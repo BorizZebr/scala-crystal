@@ -2,33 +2,33 @@ package controllers
 
 import javax.inject.Inject
 
+import dao.CompetitorsDAO
 import models._
 import models.misc.LoremIpsum
 import org.joda.time.DateTime
 import play.api.mvc._
 import play.api.libs.json._
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.util.Random
 
-class Application @Inject() (dataService: ) extends Controller {
+class Application @Inject() (competitorsDAO: CompetitorsDAO) extends Controller {
 
   implicit val jodaDateWrites = Writes.jodaDateWrites("yyyy-MM-dd")
 
   def index = Action {
-    Ok(views.html.index("Your new application is ready."))
+    Ok(views.html.index("Ok, go!"))
   }
 
-  def competitor = Action {
+  def competitor = Action.async { implicit request =>
     implicit val competitorsWrite = Json.writes[Competitor]
 
-    val competitors = Seq(
-      Competitor(1, "Страна Повторяндия"),
-      Competitor(2, "Кристаль Систаль"),
-      Competitor(3, "Обыкновенные Обыкновенности")
-    )
-
-    Ok(Json.toJson(competitors))
+    val competitors = competitorsDAO.getAll
+    competitors.map{
+      cs => Ok(Json.toJson(cs))
+    }
   }
+
 
   def chart(id: Long) = Action {
     implicit val chartPointWrite = Json.writes[ChartPoint]
@@ -49,8 +49,9 @@ class Application @Inject() (dataService: ) extends Controller {
 
     val rnd = new Random()
 
-    val reviews = (0 until take).map {
-      Review(_,
+    val reviews = (0 until take).map { x =>
+      Review(
+        Some(x),
         author = LoremIpsum.words(2).split(' ').map(_ capitalize).mkString(" "),
         text = LoremIpsum.paragraphs(1),
         DateTime.now.minusDays(rnd.nextInt(30)))
@@ -84,8 +85,9 @@ class Application @Inject() (dataService: ) extends Controller {
       "http://www.livemaster.ru/item/14994639-materialy-dlya-tvorchestva-krug-sapfir-27-mm",
       "http://www.livemaster.ru/item/12218931-materialy-dlya-tvorchestva-heart-19h20-mm")
 
-    val goods = (0 until take).map {
-      Good(_,
+    val goods = (0 until take).map { x =>
+      Good(
+        Some(x),
         LoremIpsum.words(1) capitalize,
         rnd.nextDouble() * 1000,
         imgs(rnd.nextInt(imgs.length)),
