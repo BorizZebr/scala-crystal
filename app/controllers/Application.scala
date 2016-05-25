@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import dao.CompetitorsDAO
+import dao.{ReviewsDAO, CompetitorsDAO}
 import models._
 import models.misc.LoremIpsum
 import org.joda.time.DateTime
@@ -12,7 +12,10 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.util.Random
 
-class Application @Inject() (competitorsDAO: CompetitorsDAO) extends Controller {
+class Application @Inject()
+(
+  competitorsDAO: CompetitorsDAO,
+  reviewsDAO: ReviewsDAO) extends Controller {
 
   implicit val jodaDateWrites = Writes.jodaDateWrites("yyyy-MM-dd")
 
@@ -29,6 +32,15 @@ class Application @Inject() (competitorsDAO: CompetitorsDAO) extends Controller 
     }
   }
 
+  def review(id: Long, skip: Int, take: Int) = Action.async { implicit request =>
+    implicit val reviewWrite = Json.writes[Review]
+
+    val reviews = reviewsDAO.getByCompetitor(id, skip, take)
+    reviews.map {
+      rv => Ok(Json.toJson(rv))
+    }
+  }
+
 
   def chart(id: Long) = Action {
     implicit val chartPointWrite = Json.writes[ChartPoint]
@@ -39,25 +51,9 @@ class Application @Inject() (competitorsDAO: CompetitorsDAO) extends Controller 
         val amount = rnd.nextInt(500)
         (DateTime.now.minusDays(b), amount, amount - a.head._2) :: a
       }
-    } map { x => ChartPoint(x._1, x._2, x._3)}
+    } map { x => ChartPoint(Some(1), Some(1), x._1, x._2, x._3)}
 
     Ok(Json.toJson(res))
-  }
-
-  def review(id: Long, skip: Int, take: Int) = Action {
-    implicit val reviewWrite = Json.writes[Review]
-
-    val rnd = new Random()
-
-    val reviews = (0 until take).map { x =>
-      Review(
-        Some(x),
-        author = LoremIpsum.words(2).split(' ').map(_ capitalize).mkString(" "),
-        text = LoremIpsum.paragraphs(1),
-        DateTime.now.minusDays(rnd.nextInt(30)))
-    }
-
-    Ok(Json.toJson(reviews))
   }
 
   def goods(id: Long, skip: Int, take: Int) = Action {
@@ -88,6 +84,7 @@ class Application @Inject() (competitorsDAO: CompetitorsDAO) extends Controller 
     val goods = (0 until take).map { x =>
       Good(
         Some(x),
+        Some(1),
         LoremIpsum.words(1) capitalize,
         rnd.nextDouble() * 1000,
         imgs(rnd.nextInt(imgs.length)),
