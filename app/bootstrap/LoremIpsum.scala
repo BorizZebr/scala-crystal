@@ -1,4 +1,4 @@
-package models.misc
+package bootstrap
 
 import scala.util.Random
 

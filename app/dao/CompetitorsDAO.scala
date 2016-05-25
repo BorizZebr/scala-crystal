@@ -14,16 +14,19 @@ class CompetitorsDAO @Inject()
 (
   protected val dbConfigProvider: DatabaseConfigProvider)
     extends HasDatabaseConfigProvider[JdbcProfile]
-    with CrudDAO[Competitor]{
+    with CrudDAO{
 
   import driver.api._
 
-  class CompetitorsTable(tag: Tag) extends GenericTable[Competitor](tag, "COMPETITOR") {
+  class CompetitorsTable(tag: Tag) extends Table[Competitor](tag, "COMPETITOR")
+    with IdColumn[Competitor] {
+
     def name = column[String]("NAME")
     def url = column[String]("URL")
     override def * = (id.?, name, url) <> (Competitor.tupled, Competitor.unapply)
   }
 
+  override type Entity = Competitor
   override type EntityTable = CompetitorsTable
   override val table = TableQuery[CompetitorsTable]
 }

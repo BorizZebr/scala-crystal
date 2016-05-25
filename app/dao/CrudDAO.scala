@@ -8,30 +8,29 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 /**
   * Created by borisbondarenko on 25.05.16.
   */
-trait CrudDAO[A] extends DateColumnMapper { self: HasDatabaseConfigProvider[JdbcProfile] =>
+trait CrudDAO extends TypedDAO { self: HasDatabaseConfigProvider[JdbcProfile] =>
 
   import driver.api._
 
-  abstract class GenericTable[B](tag: Tag, name: String) extends Table[A](tag, name) {
+  trait IdColumn[Entity] extends Table[Entity] {
     def id = column[Long]("ID", O.PrimaryKey, O.AutoInc)
   }
 
-  type EntityTable <: GenericTable[A]
-  val table: TableQuery[EntityTable]
+  override type EntityTable <: IdColumn[Entity]
 
-  def getAll: Future[Seq[A]] =
+  def getAll: Future[Seq[Entity]] =
     db.run(table.sortBy(_.id).result)
 
-  def getById(id: Long): Future[Option[A]] =
+  def getById(id: Long): Future[Option[Entity]] =
     db.run(table.filter(_.id === id).result.headOption)
 
   def count(): Future[Int] =
     db.run(table.map(_.id).length.result)
 
-  def insert(entity: A): Future[Unit] =
+  def insert(entity: Entity): Future[Unit] =
     db.run(table += entity).map(_ => ())
 
-  def insert(entities: Seq[A]): Future[Unit] =
+  def insert(entities: Seq[Entity]): Future[Unit] =
     db.run(this.table ++= entities).map(_ => ())
 
 }
