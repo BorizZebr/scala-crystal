@@ -43,6 +43,8 @@ object LoremIpsum {
 
   def randomPunctuation:String = punctuation(random.nextInt(punctuation.length - 1))
 
+  def word: String = words(1)
+
   def words(count:Int):String =
     if (count > 0) (randomWord + " " + words(count - 1)).trim() else ""
 

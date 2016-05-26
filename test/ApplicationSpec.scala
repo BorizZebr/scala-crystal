@@ -1,30 +1,107 @@
-import org.specs2.mutable._
-import org.specs2.runner._
-import org.junit.runner._
-
-import play.api.test._
+import models.{ChartPoint, Good, Review}
+import org.joda.time.DateTime
+import org.mockito.Matchers.{eq => eqTo, _}
+import org.mockito.Mockito._
+import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play._
+import play.api.libs.json.Json
+import play.api.mvc.Results
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 /**
- * Add your spec here.
- * You can mock out a whole application including requests, plugins etc.
- * For more information, consult the wiki.
- */
-@RunWith(classOf[JUnitRunner])
-class ApplicationSpec extends Specification {
+  * Created by borisbondarenko on 26.05.16.
+  */
+class ApplicationSpec extends PlaySpec
+  with Results
+  with MockitoSugar {
 
   "Application" should {
 
-    "send 404 on a bad request" in new WithApplication{
-      route(FakeRequest(GET, "/boum")) must beNone
+    import controllers._
+    import dao._
+    import models.Competitor
+
+    // Arrange
+    val mockCompetitorsDAO = mock[CompetitorsDAO]
+    val mockReviewsDAO = mock[ReviewsDAO]
+    val mockGoodsDAO = mock[GoodsDAO]
+    val mockChartsDAO = mock[ChartsDAO]
+
+    val controller = new Application(
+      mockCompetitorsDAO,
+      mockReviewsDAO,
+      mockGoodsDAO,
+      mockChartsDAO)
+
+    "return competitors valid" in {
+      // Arrange
+      val cSeq = Seq(
+        Competitor(Some(1), "AAA", "http://aaa.aaa"),
+        Competitor(Some(2), "BBB", "http://bbb.bbb"),
+        Competitor(Some(3), "CCC", "http://ccc.ccc"))
+      when(mockCompetitorsDAO.getAll) thenReturn Future(cSeq)
+
+      // Act
+      val competitors = controller.competitor apply FakeRequest()
+
+      // Assert
+      contentAsJson(competitors) mustEqual Json.toJson(cSeq)
     }
 
-    "render the index page" in new WithApplication{
-      val home = route(FakeRequest(GET, "/")).get
+    "return reviews valid" in {
 
-      status(home) must equalTo(OK)
-      contentType(home) must beSome.which(_ == "text/html")
-      contentAsString(home) must contain ("Your new application is ready.")
+      import bootstrap.LoremIpsum
+
+      // Arrange
+      val rSeq = Seq(
+        Review(Some(1), Some(1), LoremIpsum.words(2), LoremIpsum.paragraph, DateTime.now),
+        Review(Some(2), Some(1), LoremIpsum.words(2), LoremIpsum.paragraph, DateTime.now),
+        Review(Some(3), Some(1), LoremIpsum.words(2), LoremIpsum.paragraph, DateTime.now))
+      when(mockReviewsDAO.getByCompetitor(anyInt, anyInt, anyInt)) thenReturn Future(rSeq)
+
+      // Act
+      val reviews = controller.review(1, 100, 500) apply FakeRequest()
+
+      // Assert
+      contentAsJson(reviews) mustEqual Json.toJson(rSeq)
+    }
+
+    "return goods valid" in {
+
+      import bootstrap.LoremIpsum
+
+      // Arrange
+      val gSeq = Seq(
+        Good(Some(1), Some(1), LoremIpsum.words(2), 123.321, LoremIpsum.word, LoremIpsum.word, DateTime.now),
+        Good(Some(2), Some(1), LoremIpsum.words(2), 4342.323, LoremIpsum.word, LoremIpsum.word, DateTime.now),
+        Good(Some(3), Some(1), LoremIpsum.words(2), 164.3431, LoremIpsum.word, LoremIpsum.word, DateTime.now))
+      when(mockGoodsDAO.getByCompetitor(anyInt, anyInt, anyInt)) thenReturn Future(gSeq)
+
+      // Act
+      val goods = controller.goods(1, 100, 500) apply FakeRequest()
+
+      // Assert
+      contentAsJson(goods) mustEqual Json.toJson(gSeq)
+    }
+
+    "return charts valid" in {
+
+      // Arrange
+      val chSeq = Seq(
+        ChartPoint(DateTime.now, 1, 2),
+        ChartPoint(DateTime.now, 3, 4),
+        ChartPoint(DateTime.now, 5, 6))
+      when(mockChartsDAO.getPoints(anyInt, anyInt, anyInt)) thenReturn Future(chSeq)
+
+      // Act
+      val chart = controller.chart(1) apply FakeRequest()
+
+      // Assert
+      contentAsJson(chart) mustEqual Json.toJson(chSeq)
     }
   }
 }

@@ -3,7 +3,6 @@ package controllers
 import javax.inject.Inject
 
 import dao.{ChartsDAO, CompetitorsDAO, GoodsDAO, ReviewsDAO}
-import models._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc._
@@ -22,8 +21,6 @@ class Application @Inject()
   }
 
   def competitor = Action.async {
-    implicit val competitorsWrite = Json.writes[Competitor]
-
     val competitors = competitorsDAO.getAll
     competitors.map{
       cs => Ok(Json.toJson(cs))
@@ -32,7 +29,6 @@ class Application @Inject()
 
   def review(id: Long, skip: Int, take: Int) = Action.async {
     implicit val jodaDateWrites = Writes.jodaDateWrites("yyyy-MM-dd HH:mm")
-    implicit val reviewWrite = Json.writes[Review]
 
     val reviews = reviewsDAO.getByCompetitor(id, skip, take)
     reviews.map {
@@ -41,8 +37,6 @@ class Application @Inject()
   }
 
   def goods(id: Long, skip: Int, take: Int) = Action.async {
-    implicit val goodWrite = Json.writes[Good]
-
     val goods = goodsDAO.getByCompetitor(id, skip, take)
     goods.map {
       gd => Ok(Json.toJson(gd))
@@ -51,8 +45,6 @@ class Application @Inject()
 
 
   def chart(id: Long) = Action.async {
-    implicit val chartPointWrite = Json.writes[ChartPoint]
-
     val points = chartsDAO.getPoints(id, 0, 30)
     points.map {
       pt => Ok(Json.toJson(pt))

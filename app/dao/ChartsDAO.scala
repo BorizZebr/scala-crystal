@@ -38,11 +38,13 @@ class ChartsDAO @Inject()
   override val table: driver.api.TableQuery[EntityTable] = TableQuery[ChartsTable]
 
   def getPoints(competitorId: Long, skip: Int, take: Int): Future[Seq[ChartPoint]] =
-    getByCompetitor(competitorId, skip, take).map { future =>
-      val seq = future.reverse
-      seq.tail.foldLeft(Seq(ChartPoint(seq.head.date, seq.head.amount, 0))) { (a, b) =>
-        a :+ ChartPoint(b.date, b.amount, b.amount - a.head.amount)
-      }
+    getByCompetitor(competitorId, skip, take).map {
+      case a if a.isEmpty => Nil
+      case a =>
+        val seq = a.reverse
+        seq.tail.foldLeft(Seq(ChartPoint(seq.head.date, seq.head.amount, 0))) { (a, b) =>
+          a :+ ChartPoint(b.date, b.amount, b.amount - a.head.amount)
+        }
     }
 
 }
