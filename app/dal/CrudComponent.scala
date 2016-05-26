@@ -1,14 +1,13 @@
-package dao
+package dal
 
-import play.api.db.slick.HasDatabaseConfigProvider
-import slick.driver.JdbcProfile
-import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
+import scala.concurrent.Future
 
 /**
   * Created by borisbondarenko on 25.05.16.
   */
-trait CrudDAO extends TypedDAO { self: HasDatabaseConfigProvider[JdbcProfile] =>
+trait CrudComponent extends TypedComponent { self: DatabaseComponent =>
 
   import driver.api._
 

@@ -6,8 +6,9 @@ lazy val `scalaplayground` = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.11.7"
 
-libraryDependencies ++= Seq( cache , ws,
+libraryDependencies ++= Seq( cache , ws, jdbc,
   // Database
+  "com.typesafe.slick" %% "slick" % "3.1.1",
   "com.typesafe.play" %% "play-slick" % "2.0.2",
   "com.typesafe.play" %% "play-slick-evolutions" % "2.0.2",
   //"mysql" % "mysql-connector-java" % "6.0.2",
@@ -16,7 +17,7 @@ libraryDependencies ++= Seq( cache , ws,
   "org.scalatest" %% "scalatest" % "2.2.6" % "test",
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0" % "test",
   "org.eu.acolyte" %% "jdbc-scala" % "1.0.36-j7p" % "test",
-  "org.mockito" % "mockito-core" % "1.10.19"
+  "org.mockito" % "mockito-core" % "1.10.19" % "test"
 )
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )  

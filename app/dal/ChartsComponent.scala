@@ -1,25 +1,15 @@
-package dao
+package dal
 
-import javax.inject.{Inject, Singleton}
-
-import models.{Chart, ChartPoint}
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import slick.driver.JdbcProfile
+import models.{ChartPoint, Chart}
 
 import scala.concurrent.Future
 
 /**
-  * Created by borisbondarenko on 25.05.16.
+  * Created by borisbondarenko on 27.05.16.
   */
-@Singleton
-class ChartsDAO @Inject()
-(
-  protected val dbConfigProvider: DatabaseConfigProvider,
-  protected val competitorsDAO: CompetitorsDAO)
-  extends HasDatabaseConfigProvider[JdbcProfile]
-    with CrudDAO
-    with CompetitorDependentDAO {
+trait ChartsComponent extends DatabaseComponent
+  with CrudComponent
+  with CompetitorsDependentComponent {
 
   import driver.api._
 
@@ -27,10 +17,9 @@ class ChartsDAO @Inject()
     with IdColumn[Chart]
     with CompetitorDependantColumns[Chart] {
 
-    def competitor = foreignKey("DIR_FK", competitorId, competitorsDAO.table)(_.id)
-
     def amount = column[Int]("AMOUNT")
-    override def * = (id.?, competitorId.?, amount, date) <> (Chart.tupled, Chart.unapply)
+
+    override def * = (id.?, competitorId.?, amount, date) <>(Chart.tupled, Chart.unapply)
   }
 
   override type EntityTable = ChartsTable

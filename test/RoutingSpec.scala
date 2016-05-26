@@ -1,6 +1,5 @@
 import controllers._
 import org.scalatestplus.play._
-import play.api.Play
 import play.api.test.Helpers._
 import play.api.test._
 

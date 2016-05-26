@@ -2,7 +2,8 @@ package controllers
 
 import javax.inject.Inject
 
-import dao.{ChartsDAO, CompetitorsDAO, GoodsDAO, ReviewsDAO}
+import dal.dao.{ReviewsDAO, GoodsDAO, CompetitorsDAO, ChartsDAO}
+import dal.ReviewsDAO
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc._

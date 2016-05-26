@@ -1,24 +1,21 @@
-package dao
+package dal
 
 import org.joda.time.DateTime
-import play.api.db.slick.HasDatabaseConfigProvider
-import slick.driver.JdbcProfile
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
 
 /**
-  * Created by borisbondarenko on 25.05.16.
+  * Created by borisbondarenko on 27.05.16.
   */
-trait CompetitorDependentDAO
-  extends TypedDAO
-  with DateColumnMapper { self: HasDatabaseConfigProvider[JdbcProfile] =>
+trait CompetitorsDependentComponent extends TypedComponent
+  with DateColumnMapper { self: DatabaseComponent =>
 
   import driver.api._
 
   trait CompetitorDependantColumns[B] extends Table[Entity] {
     def competitorId = column[Long]("COMPETITOR_ID")
     def date = column[DateTime]("DATE")
+    // def competitor = foreignKey("DIR_FK", competitorId, TableQuery[CompetitorsTable])(_.id)
   }
 
   override type EntityTable <: CompetitorDependantColumns[Entity]

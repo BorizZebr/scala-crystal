@@ -2,7 +2,8 @@ package bootstrap
 
 import javax.inject.Inject
 
-import dao.{ChartsDAO, GoodsDAO, ReviewsDAO, CompetitorsDAO}
+import dal.dao.{ReviewsDAO, GoodsDAO, CompetitorsDAO, ChartsDAO}
+import dal.ReviewsDAO
 import models._
 import org.joda.time.DateTime
 

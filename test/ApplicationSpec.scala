@@ -1,3 +1,4 @@
+import dal.dao.{ReviewsDAO, GoodsDAO, CompetitorsDAO, ChartsDAO}
 import models.{ChartPoint, Good, Review}
 import org.joda.time.DateTime
 import org.mockito.Matchers.{eq => eqTo, _}
@@ -22,7 +23,7 @@ class ApplicationSpec extends PlaySpec
   "Application" should {
 
     import controllers._
-    import dao._
+    import dal._
     import models.Competitor
 
     // Arrange
