@@ -1,4 +1,4 @@
-package dal
+package dal.components
 
 import slick.backend.DatabaseConfig
 import slick.driver.JdbcProfile

@@ -1,13 +1,20 @@
-package dal
+package dal.repos
 
-import models.{ChartPoint, Chart}
+import javax.inject.{Inject, Singleton}
+
+import dal.components.{CompetitorsDependentComponent, CrudComponent, DatabaseComponent}
+import models.{Chart, ChartPoint}
+import slick.backend.DatabaseConfig
+import slick.driver.JdbcProfile
 
 import scala.concurrent.Future
 
 /**
   * Created by borisbondarenko on 27.05.16.
   */
-trait ChartsComponent extends DatabaseComponent
+@Singleton
+class ChartsRepo @Inject() (val dbConfig: DatabaseConfig[JdbcProfile])
+  extends DatabaseComponent
   with CrudComponent
   with CompetitorsDependentComponent {
 

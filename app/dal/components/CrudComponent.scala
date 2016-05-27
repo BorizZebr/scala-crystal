@@ -1,4 +1,4 @@
-package dal
+package dal.components
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 

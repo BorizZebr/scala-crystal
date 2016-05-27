@@ -1,4 +1,4 @@
-package dal
+package dal.components
 
 import org.joda.time.DateTime
 

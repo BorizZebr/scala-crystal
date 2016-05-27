@@ -1,13 +1,20 @@
-package dal
+package dal.repos
 
+import javax.inject.{Inject, Singleton}
+
+import dal.components.{CompetitorsDependentComponent, CrudComponent, DatabaseComponent}
 import models.Review
+import slick.backend.DatabaseConfig
+import slick.driver.JdbcProfile
 
 /**
   * Created by borisbondarenko on 27.05.16.
   */
-trait ReviewsComponent extends DatabaseComponent
+@Singleton
+class ReviewsRepo @Inject() (val dbConfig: DatabaseConfig[JdbcProfile])
+  extends DatabaseComponent
   with CrudComponent
-  with CompetitorsDependentComponent { self: DatabaseComponent =>
+  with CompetitorsDependentComponent {
 
   import driver.api._
 

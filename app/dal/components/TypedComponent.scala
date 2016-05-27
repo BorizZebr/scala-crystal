@@ -1,4 +1,4 @@
-package dal
+package dal.components
 
 /**
   * Created by borisbondarenko on 27.05.16.
