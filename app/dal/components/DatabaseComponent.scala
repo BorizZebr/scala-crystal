@@ -1,6 +1,7 @@
 package dal.components
 
-import slick.backend.DatabaseConfig
+import com.google.inject.ImplementedBy
+import config.DataAccessConfig
 import slick.driver.JdbcProfile
 
 /**
@@ -8,9 +9,17 @@ import slick.driver.JdbcProfile
   */
 trait DatabaseComponent {
 
-  val dbConfig: DatabaseConfig[JdbcProfile]
+  val dalConfig: DalConfig
 
-  lazy val db = dbConfig.db
+  protected val db = dalConfig.db
 
-  lazy val driver = dbConfig.driver
+  protected val driver = dalConfig.driver
+}
+
+@ImplementedBy(classOf[DataAccessConfig])
+trait DalConfig {
+
+  val driver: JdbcProfile
+
+  val db: JdbcProfile#Backend#Database
 }

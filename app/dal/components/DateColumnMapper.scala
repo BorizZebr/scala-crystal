@@ -9,7 +9,7 @@ import slick.driver.JdbcProfile
 /**
   * Created by borisbondarenko on 25.05.16.
   */
-trait DateColumnMapper extends HasDatabaseConfig[JdbcProfile] {
+trait DateColumnMapper { self: DatabaseComponent =>
 
   import driver.api._
 

@@ -2,18 +2,17 @@ package controllers
 
 import javax.inject.Inject
 
-import dal.dao.{ReviewsDAO, GoodsDAO, CompetitorsDAO, ChartsDAO}
-import dal.ReviewsDAO
+import dal.repos.{ChartsRepo, GoodsRepo, ReviewsRepo, CompetitorsRepo}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc._
 
 class Application @Inject()
 (
-  competitorsDAO: CompetitorsDAO,
-  reviewsDAO: ReviewsDAO,
-  goodsDAO: GoodsDAO,
-  chartsDAO: ChartsDAO) extends Controller {
+  competitorsRepo: CompetitorsRepo,
+  reviewsRepo: ReviewsRepo,
+  goodsRepo: GoodsRepo,
+  chartsRepo: ChartsRepo) extends Controller {
 
   implicit val jodaDateWrites = Writes.jodaDateWrites("yyyy-MM-dd")
 
@@ -22,7 +21,7 @@ class Application @Inject()
   }
 
   def competitor = Action.async {
-    val competitors = competitorsDAO.getAll
+    val competitors = competitorsRepo.getAll
     competitors.map{
       cs => Ok(Json.toJson(cs))
     }
@@ -31,14 +30,14 @@ class Application @Inject()
   def review(id: Long, skip: Int, take: Int) = Action.async {
     implicit val jodaDateWrites = Writes.jodaDateWrites("yyyy-MM-dd HH:mm")
 
-    val reviews = reviewsDAO.getByCompetitor(id, skip, take)
+    val reviews = reviewsRepo.getByCompetitor(id, skip, take)
     reviews.map {
       rv => Ok(Json.toJson(rv))
     }
   }
 
   def goods(id: Long, skip: Int, take: Int) = Action.async {
-    val goods = goodsDAO.getByCompetitor(id, skip, take)
+    val goods = goodsRepo.getByCompetitor(id, skip, take)
     goods.map {
       gd => Ok(Json.toJson(gd))
     }
@@ -46,7 +45,7 @@ class Application @Inject()
 
 
   def chart(id: Long) = Action.async {
-    val points = chartsDAO.getPoints(id, 0, 30)
+    val points = chartsRepo.getPoints(id, 0, 30)
     points.map {
       pt => Ok(Json.toJson(pt))
     }

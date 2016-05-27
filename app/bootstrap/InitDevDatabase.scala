@@ -2,8 +2,7 @@ package bootstrap
 
 import javax.inject.Inject
 
-import dal.dao.{ReviewsDAO, GoodsDAO, CompetitorsDAO, ChartsDAO}
-import dal.ReviewsDAO
+import dal.repos.{CompetitorsRepo, ReviewsRepo, GoodsRepo, ChartsRepo}
 import models._
 import org.joda.time.DateTime
 
@@ -16,20 +15,20 @@ import scala.util.Try
   */
 private[bootstrap] class InitDevDatabase @Inject()
 (
-  competitorsDAO: CompetitorsDAO,
-  reviewsDAO: ReviewsDAO,
-  goodsDAO: GoodsDAO,
-  chartsDAO: ChartsDAO) {
+  competitorsRepo: CompetitorsRepo,
+  reviewsRepo: ReviewsRepo,
+  goodsRepo: GoodsRepo,
+  chartsRepo: ChartsRepo) {
 
   def insert(): Unit = {
     import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
     val insertInitialDataFuture = for {
-      count <- competitorsDAO.count() if count == 0
-      _ <- competitorsDAO.insert(InitDevDatabase.competitors)
-      _ <- reviewsDAO.insert(InitDevDatabase.reviews)
-      _ <- goodsDAO.insert(InitDevDatabase.goods)
-      _ <- chartsDAO.insert(InitDevDatabase.charts)
+      count <- competitorsRepo.count() if count == 0
+      _ <- competitorsRepo.insert(InitDevDatabase.competitors)
+      _ <- reviewsRepo.insert(InitDevDatabase.reviews)
+      _ <- goodsRepo.insert(InitDevDatabase.goods)
+      _ <- chartsRepo.insert(InitDevDatabase.charts)
     } yield ()
 
     Try(Await.result(insertInitialDataFuture, Duration.Inf))

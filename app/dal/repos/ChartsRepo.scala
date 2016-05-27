@@ -2,10 +2,8 @@ package dal.repos
 
 import javax.inject.{Inject, Singleton}
 
-import dal.components.{CompetitorsDependentComponent, CrudComponent, DatabaseComponent}
+import dal.components.{CompetitorsDependentComponent, CrudComponent, DalConfig, DatabaseComponent}
 import models.{Chart, ChartPoint}
-import slick.backend.DatabaseConfig
-import slick.driver.JdbcProfile
 
 import scala.concurrent.Future
 
@@ -13,7 +11,7 @@ import scala.concurrent.Future
   * Created by borisbondarenko on 27.05.16.
   */
 @Singleton
-class ChartsRepo @Inject() (val dbConfig: DatabaseConfig[JdbcProfile])
+class ChartsRepo @Inject() (val dalConfig: DalConfig)
   extends DatabaseComponent
   with CrudComponent
   with CompetitorsDependentComponent {
@@ -33,7 +31,10 @@ class ChartsRepo @Inject() (val dbConfig: DatabaseConfig[JdbcProfile])
   override type Entity = Chart
   override val table: driver.api.TableQuery[EntityTable] = TableQuery[ChartsTable]
 
-  def getPoints(competitorId: Long, skip: Int, take: Int): Future[Seq[ChartPoint]] =
+  def getPoints(competitorId: Long, skip: Int, take: Int): Future[Seq[ChartPoint]] = {
+
+    import scala.concurrent.ExecutionContext.Implicits.global
+
     getByCompetitor(competitorId, skip, take).map {
       case a if a.isEmpty => Nil
       case a =>
@@ -42,5 +43,6 @@ class ChartsRepo @Inject() (val dbConfig: DatabaseConfig[JdbcProfile])
           a :+ ChartPoint(b.date, b.amount, b.amount - a.head.amount)
         }
     }
+  }
 
 }
