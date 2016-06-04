@@ -58,8 +58,7 @@ class ApplicationSpec extends PlaySpec
     }
 
     "return reviews valid" in {
-
-      import bootstrap.LoremIpsum
+      import bootstrap.init.LoremIpsum
 
       // Arrange
       val rSeq = Seq(
@@ -76,8 +75,7 @@ class ApplicationSpec extends PlaySpec
     }
 
     "return goods valid" in {
-
-      import bootstrap.LoremIpsum
+      import bootstrap.init.LoremIpsum
 
       // Arrange
       val gSeq = Seq(

@@ -1,9 +1,10 @@
-package bootstrap
+package bootstrap.init
 
 import javax.inject.Inject
 
-import dal.repos.{CompetitorsRepo, ReviewsRepo, GoodsRepo, ChartsRepo}
-import models._
+import com.google.inject.AbstractModule
+import dal.repos.{ChartsRepo, GoodsRepo, ReviewsRepo, CompetitorsRepo}
+import models.{Chart, Good, Review, Competitor}
 import org.joda.time.DateTime
 
 import scala.concurrent.Await
@@ -13,7 +14,13 @@ import scala.util.Try
 /**
   * Created by borisbondarenko on 25.05.16.
   */
-private[bootstrap] class InitDevDatabase @Inject()
+class InitDevDatabaseModule extends AbstractModule {
+
+  override protected def configure(): Unit =
+    bind(classOf[InitDevDatabase]).asEagerSingleton()
+}
+
+private[init] class InitDevDatabase @Inject()
 (
   competitorsRepo: CompetitorsRepo,
   reviewsRepo: ReviewsRepo,
@@ -37,7 +44,7 @@ private[bootstrap] class InitDevDatabase @Inject()
   insert()
 }
 
-private[bootstrap] object InitDevDatabase {
+private[init] object InitDevDatabase {
 
   import scala.util.Random
 
