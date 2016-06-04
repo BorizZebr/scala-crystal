@@ -25,6 +25,11 @@ class ApplicationSpec extends PlaySpec
     import controllers._
     import models.Competitor
 
+//    implicit val competitorWrite = Json.writes[Competitor]
+//    implicit val reviewWrite = Json.writes[Review]
+//    implicit val goodWrite = Json.writes[Good]
+//    implicit val chartWrite = Json.writes[ChartPoint]
+
     // Arrange
     val mockCompetitorsRepo = mock[CompetitorsRepo]
     val mockReviewsRepo = mock[ReviewsRepo]

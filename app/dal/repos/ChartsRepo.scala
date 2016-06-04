@@ -39,9 +39,9 @@ class ChartsRepo @Inject() (val dalConfig: DalConfig)
       case a if a.isEmpty => Nil
       case a =>
         val seq = a.reverse
-        seq.tail.foldLeft(Seq(ChartPoint(seq.head.date, seq.head.amount, 0))) { (a, b) =>
-          a :+ ChartPoint(b.date, b.amount, b.amount - a.head.amount)
-        }
+        seq.tail.foldLeft(List(ChartPoint(seq.head.date, seq.head.amount, 0))) { (a, b) =>
+          ChartPoint(b.date, b.amount, b.amount - a.head.amount) :: a
+        } reverse
     }
   }
 

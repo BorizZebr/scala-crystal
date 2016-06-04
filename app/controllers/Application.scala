@@ -19,12 +19,7 @@ class Application @Inject()
     Ok(views.html.index("Ok, go!"))
   }
 
-  implicit val jodaDateWrites = Writes.jodaDateWrites("yyyy-MM-dd")
-
   def competitor = Action.async {
-
-    implicit val competitorsWrite = Json.writes[Competitor]
-
     val competitors = competitorsRepo.getAll
     competitors.map{
       cs => Ok(Json.toJson(cs))
@@ -32,10 +27,6 @@ class Application @Inject()
   }
 
   def review(id: Long, skip: Int, take: Int) = Action.async {
-
-    implicit val jodaDateWrites = Writes.jodaDateWrites("yyyy-MM-dd HH:mm")
-    implicit val reviewWrite = Json.writes[Review]
-
     val reviews = reviewsRepo.getByCompetitor(id, skip, take)
     reviews.map {
       rv => Ok(Json.toJson(rv))
@@ -43,20 +34,13 @@ class Application @Inject()
   }
 
   def goods(id: Long, skip: Int, take: Int) = Action.async {
-
-    implicit val goodWrite = Json.writes[Good]
-
     val goods = goodsRepo.getByCompetitor(id, skip, take)
     goods.map {
       gd => Ok(Json.toJson(gd))
     }
   }
 
-
   def chart(id: Long) = Action.async {
-
-    implicit val chartPointWrite = Json.writes[ChartPoint]
-
     val points = chartsRepo.getPoints(id, 0, 30)
     points.map {
       pt => Ok(Json.toJson(pt))
