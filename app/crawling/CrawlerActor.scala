@@ -11,7 +11,7 @@ object CrawlerActor {
 
   def props = Props[CrawlerActor]
 
-  case class Crawl(competitor: Competitor)
+  case class CrawlCompetitor(competitor: Competitor)
 }
 
 class CrawlerActor extends Actor {
@@ -19,7 +19,7 @@ class CrawlerActor extends Actor {
   import CrawlerActor._
 
   override def receive: Receive = {
-    case Crawl(c) =>
+    case CrawlCompetitor(c) =>
 
     case _ => Logger.error("Crawler actor has received invalid message");
   }
