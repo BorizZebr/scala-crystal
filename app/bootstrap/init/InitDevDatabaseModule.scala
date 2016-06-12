@@ -72,9 +72,9 @@ private[init] object InitDevDatabase {
 
 
   val competitors = Seq(
-    Competitor(Some(1), "Страна Повторяндия", "http://www.livemaster.ru/3165"),
-    Competitor(Some(2), "Кристаль Систаль", "http://www.livemaster.ru/etnoart"),
-    Competitor(Some(3), "Обыкновенные Обыкновенности", "http://www.livemaster.ru/embroidery")
+    Competitor(Some(1), "Страна Повторяндия", "http://www.livemaster.ru/3165", None, None),
+    Competitor(Some(2), "Кристаль Систаль", "http://www.livemaster.ru/etnoart", None, None),
+    Competitor(Some(3), "Обыкновенные Обыкновенности", "http://www.livemaster.ru/embroidery", None, None)
   )
 
   val reviews = for {

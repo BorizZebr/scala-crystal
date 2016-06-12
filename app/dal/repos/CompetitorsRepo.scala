@@ -4,6 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import dal.components.{CrudComponent, DalConfig, DatabaseComponent}
 import models.Competitor
+import org.joda.time.DateTime
 
 /**
   * Created by borisbondarenko on 26.05.16.
@@ -20,7 +21,9 @@ class CompetitorsRepo @Inject() (val dalConfig: DalConfig)
 
     def name = column[String]("NAME")
     def url = column[String]("URL")
-    override def * = (id.?, name, url) <>(Competitor.tupled, Competitor.unapply)
+    def crawlStart = column[DateTime]("LAST_CRAWL_START")
+    def crawlFinish = column[DateTime]("LAST_CRAWL_FINISH")
+    override def * = (id.?, name, url, crawlStart, crawlFinish) <> (Competitor.tupled, Competitor.unapply)
   }
 
   override type Entity = Competitor
