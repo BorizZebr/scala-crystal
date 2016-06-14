@@ -8,6 +8,7 @@ import dal.repos.{ChartsRepo, CompetitorsRepo, GoodsRepo, ReviewsRepo}
 import models.{Chart, Good, Review}
 import org.joda.time.DateTime
 import play.api.Logger
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by borisbondarenko on 04.06.16.
