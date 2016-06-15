@@ -21,7 +21,7 @@ object CrawlMasterActor {
 
   case class CrawlAllCompetitors()
 
-  case class CrawlComplete(idCompetitor: Int, subAmout: Int, reviews: Seq[Review], goods: Seq[Good], date: DateTime)
+  case class CrawlComplete()//(idCompetitor: Int, subAmout: Int, reviews: Seq[Review], goods: Seq[Good], date: DateTime)
 }
 
 class CrawlMasterActor @Inject()(
@@ -36,18 +36,23 @@ class CrawlMasterActor @Inject()(
   override def receive: Receive = {
 
     case CrawlAllCompetitors =>
-      for(cmttrs <- competitorsRepo.getAll) cmttrs.foreach {
-        val crawlerActor = injectedChild(crawlersFactory(), "crawler")
-        crawlerActor ! CrawlCompetitor(_)
+      for(cmttrs <- competitorsRepo.getAll) cmttrs.foreach { cmp =>
+        val name = s"crawler-${cmp.id.getOrElse(0)}-${System.nanoTime}"
+        val crawlerActor = injectedChild(crawlersFactory(), name)
+        crawlerActor ! CrawlCompetitor(cmp)
+
+        Logger.info(s"Crawl $name")
       }
 
-    case CrawlComplete(idC, am, rw, gd, d) =>
-      competitorsRepo.getById(idC).map { c =>
-        chartsRepo.insert(Chart(None, Some(idC), am, d))
-        reviewsRepo.insert(rw)
-        goodsRepo.insert(gd)
-      }
-      sender ! PoisonPill
+    case CrawlComplete() => //(idC, am, rw, gd, d) =>
+//      competitorsRepo.getById(idC).map { c =>
+//        chartsRepo.insert(Chart(None, Some(idC), am, d))
+//        reviewsRepo.insert(rw)
+//        goodsRepo.insert(gd)
+//      }
+      sender !
+        PoisonPill
+        Logger.info(s"PoisonPill $sender")
 
     case _ => Logger.warn("CrawlMasterActor doesn't receive this messages")
   }

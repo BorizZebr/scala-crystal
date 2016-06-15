@@ -1,6 +1,7 @@
 package crawling
 
 import akka.actor._
+import crawling.CrawlMasterActor.CrawlComplete
 import models.Competitor
 import play.api.Logger
 
@@ -23,7 +24,7 @@ class CrawlerActor extends Actor {
   import CrawlerActor._
 
   override def receive: Receive = {
-    case CrawlCompetitor(c) =>
+    case CrawlCompetitor(c) => sender ! CrawlComplete()
 
     case _ => Logger.error("Crawler actor has received invalid message");
   }
