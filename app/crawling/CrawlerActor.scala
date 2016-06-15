@@ -11,6 +11,10 @@ object CrawlerActor {
 
   def props = Props[CrawlerActor]
 
+  trait Factory {
+    def apply(): Actor
+  }
+
   case class CrawlCompetitor(competitor: Competitor)
 }
 

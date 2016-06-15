@@ -21,9 +21,9 @@ class CompetitorsRepo @Inject() (val dalConfig: DalConfig)
 
     def name = column[String]("NAME")
     def url = column[String]("URL")
-    def crawlStart = column[DateTime]("LAST_CRAWL_START")
-    def crawlFinish = column[DateTime]("LAST_CRAWL_FINISH")
-    override def * = (id.?, name, url, crawlStart, crawlFinish) <> (Competitor.tupled, Competitor.unapply)
+    def lastCrawlStart = column[Option[DateTime]]("LAST_CRAWL_START")
+    def lastCrawlFinish = column[Option[DateTime]]("LAST_CRAWL_FINISH")
+    override def * = (id.?, name, url, lastCrawlStart, lastCrawlFinish) <> (Competitor.tupled, Competitor.unapply)
   }
 
   override type Entity = Competitor

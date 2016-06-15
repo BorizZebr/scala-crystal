@@ -8,6 +8,8 @@ import dal.repos.{ChartsRepo, CompetitorsRepo, GoodsRepo, ReviewsRepo}
 import models.{Chart, Good, Review}
 import org.joda.time.DateTime
 import play.api.Logger
+import play.api.libs.concurrent.InjectedActorSupport
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
@@ -23,10 +25,11 @@ object CrawlMasterActor {
 }
 
 class CrawlMasterActor @Inject()(
+    crawlersFactory: CrawlerActor.Factory,
     competitorsRepo: CompetitorsRepo,
     reviewsRepo: ReviewsRepo,
     goodsRepo: GoodsRepo,
-    chartsRepo: ChartsRepo) extends Actor{
+    chartsRepo: ChartsRepo) extends Actor with InjectedActorSupport{
 
   import CrawlerActor._
 
@@ -34,7 +37,7 @@ class CrawlMasterActor @Inject()(
 
     case CrawlAllCompetitors =>
       for(cmttrs <- competitorsRepo.getAll) cmttrs.foreach {
-        val crawlerActor = context.actorOf(CrawlerActor.props)
+        val crawlerActor = injectedChild(crawlersFactory(), "crawler")
         crawlerActor ! CrawlCompetitor(_)
       }
 
