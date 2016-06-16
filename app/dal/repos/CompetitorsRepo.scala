@@ -1,10 +1,13 @@
-package dal.repos
+package dal
+package repos
 
 import javax.inject.{Inject, Singleton}
 
 import dal.components.{CrudComponent, DalConfig, DatabaseComponent}
 import models.Competitor
 import org.joda.time.DateTime
+
+import scala.concurrent.Future
 
 /**
   * Created by borisbondarenko on 26.05.16.
@@ -29,4 +32,7 @@ class CompetitorsRepo @Inject() (val dalConfig: DalConfig)
   override type Entity = Competitor
   override type EntityTable = CompetitorsTable
   override val table = TableQuery[CompetitorsTable]
+
+  def getByUrl(url: String): Future[Option[Competitor]] =
+    db.run(table.filter(_.url === url).result.headOption)
 }

@@ -1,4 +1,5 @@
-package dal.repos
+package dal
+package repos
 
 import javax.inject.{Inject, Singleton}
 
@@ -32,8 +33,6 @@ class ChartsRepo @Inject() (val dalConfig: DalConfig)
   override val table: driver.api.TableQuery[EntityTable] = TableQuery[ChartsTable]
 
   def getPoints(competitorId: Long, skip: Int, take: Int): Future[Seq[ChartPoint]] = {
-
-    import scala.concurrent.ExecutionContext.Implicits.global
 
     getByCompetitor(competitorId, skip, take).map {
       case a if a.isEmpty => Nil

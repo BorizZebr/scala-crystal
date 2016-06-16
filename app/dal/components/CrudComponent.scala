@@ -1,6 +1,5 @@
-package dal.components
-
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
+package dal
+package components
 
 import scala.concurrent.Future
 
@@ -30,6 +29,8 @@ trait CrudComponent extends TypedComponent { self: DatabaseComponent =>
     db.run(table += entity).map(_ => ())
 
   def insert(entities: Seq[Entity]): Future[Unit] =
-    db.run(this.table ++= entities).map(_ => ())
+    db.run(table ++= entities).map(_ => ())
 
+  def update(entity: Entity): Future[Unit] =
+    db.run(table.insertOrUpdate(entity)).map(_ => ())
 }
