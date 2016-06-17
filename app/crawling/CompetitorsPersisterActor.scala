@@ -6,9 +6,10 @@ import akka.actor.{Actor, Props}
 import crawling.CompetitorsPersisterActor.PersistCompetitors
 import dal.repos.CompetitorsRepo
 import models.Competitor
-import play.api.Configuration
+import play.api.{Configuration, Logger}
 
 import scala.collection.JavaConversions._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
@@ -40,11 +41,13 @@ class CompetitorsPersisterActor @Inject()(
           case Some(comInDb) => if (comInDb.name != name) {
             val comToUpdate = Competitor(comInDb.id, name, url, comInDb.lastCrawlStart, comInDb.lastCrawlFinish)
             competitorsRepo.update(comToUpdate)
+            Logger.info(s"Competitor ${comInDb.name} was renamed to $name")
           }
           // in case of none -- create in DB
           case None =>
             val comToCreate = Competitor(None, name, url, None, None)
             competitorsRepo.insert(comToCreate)
+            Logger.info(s"Competitor $name was created")
         }
       }
   }

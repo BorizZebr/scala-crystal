@@ -7,12 +7,14 @@ lazy val `scalaplayground` = (project in file(".")).enablePlugins(PlayScala)
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq( cache , ws, //jdbc,
-  // Database
+  // database
   "com.typesafe.slick" %% "slick" % "3.1.1",
   "com.typesafe.play" %% "play-slick" % "2.0.2",
   "com.typesafe.play" %% "play-slick-evolutions" % "2.0.2",
   //"mysql" % "mysql-connector-java" % "6.0.2",
   "com.h2database" % "h2" % "1.4.191",
+  // crawling
+  "org.jsoup" % "jsoup" % "1.9.2",
   // test
   "org.scalatest" %% "scalatest" % "2.2.6" % "test",
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0" % "test",
