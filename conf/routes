@@ -5,6 +5,8 @@
 # Home page
 GET     /                           controllers.Application.index
 
+GET     /logs                       controllers.Application.logs
+
 GET     /competitors                controllers.Application.competitor
 
 GET     /chart/:id                  controllers.Application.chart(id: Long)

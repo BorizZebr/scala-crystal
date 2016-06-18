@@ -15,10 +15,26 @@ class Application @Inject()
   goodsRepo: GoodsRepo,
   chartsRepo: ChartsRepo) extends Controller {
 
+  /**
+    * Index page controller
+    * @return
+    */
   def index = Action {
     Ok(views.html.index("Ok, go!"))
   }
 
+  /**
+    * Logs page controller
+    * @return
+    */
+  def logs = Action {
+    Ok(views.html.logs())
+  }
+
+  /**
+    * GET Competitors API
+    * @return All competitors registered in system
+    */
   def competitor = Action.async {
     val competitors = competitorsRepo.getAll
     competitors.map{
@@ -26,6 +42,13 @@ class Application @Inject()
     }
   }
 
+  /**
+    * GET Reviews API
+    * @param id Id of competitor
+    * @param skip Reviews to skip
+    * @param take Reviews to take
+    * @return Reviews for competitor
+    */
   def review(id: Long, skip: Int, take: Int) = Action.async {
     val reviews = reviewsRepo.getByCompetitor(id, skip, take)
     reviews.map {
@@ -33,6 +56,13 @@ class Application @Inject()
     }
   }
 
+  /**
+    * GET Goods API
+    * @param id Id of competitor
+    * @param skip Goods to skip
+    * @param take Goods to take
+    * @return Goods for competitor
+    */
   def goods(id: Long, skip: Int, take: Int) = Action.async {
     val goods = goodsRepo.getByCompetitor(id, skip, take)
     goods.map {
@@ -40,6 +70,11 @@ class Application @Inject()
     }
   }
 
+  /**
+    * GET Chart points API
+    * @param id Id of competitor
+    * @return Chart for passed 30 days
+    */
   def chart(id: Long) = Action.async {
     val points = chartsRepo.getPoints(id, 0, 30)
     points.map {

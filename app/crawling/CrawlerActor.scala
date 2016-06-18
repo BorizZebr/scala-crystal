@@ -4,49 +4,63 @@ import javax.inject.Inject
 
 import akka.actor._
 import akka.stream.Materializer
-import crawling.CrawlMasterActor.CrawlComplete
 import models.Competitor
 import play.api.Logger
+import play.api.libs.concurrent.InjectedActorSupport
 import play.api.libs.ws.WSResponse
 import play.api.libs.ws.ahc.AhcWSClient
+
+import scala.concurrent.Future
 
 /**
   * Created by borisbondarenko on 04.06.16.
   */
 object CrawlerActor {
 
-  def props = Props[CrawlerActor]
-
   trait Factory {
     def apply(): Actor
   }
 
+  def props = Props[CrawlerActor]
+
   case class CrawlCompetitor(competitor: Competitor)
-  case class SuccessfulGet(response: WSResponse)
-  case class FailedGet(e: Throwable)
+
+  case class CrawlComplete()
 }
 
-class CrawlerActor @Inject()(implicit val mat: Materializer)extends Actor {
+class CrawlerActor @Inject()(
+    analizersFactory: ContentAnalizerActor.Factory,
+    implicit val mat: Materializer) extends Actor with InjectedActorSupport {
 
+  import ContentAnalizerActor._
   import CrawlerActor._
-  import akka.pattern.pipe
   import context.dispatcher
 
   private val httpClient: AhcWSClient = AhcWSClient()
 
   override def receive: Receive = {
     case CrawlCompetitor(c) =>
-      httpClient.url(c.url).get().map { resp => SuccessfulGet(resp)
-      }.recover {
-        case e: Throwable => FailedGet(e)
-      }.pipeTo(self)
+      for {
+        main <- httpClient.url(c.url).get()
+        goods <- getAdditionalMainPages(main)
+        reviews <- getReviewsPages(c, main)
+      } yield {
+        val name = s"analizer-${c.id.getOrElse(0)}-${System.nanoTime}"
+        val analizerActor = injectedChild(analizersFactory(), name)
+        analizerActor ! AnalizeContent(c, goods, reviews)
 
-    case SuccessfulGet(resp) =>
-      context.parent ! CrawlComplete()
+        Logger.info(s"Analize $name")
+      }
 
-    case FailedGet(e) =>
-      context.parent ! CrawlComplete()
+    case AnalizeComplete =>
+      sender ! PoisonPill
+      context.parent ! CrawlComplete
 
-    case invalid@_ => Logger.error(s"Crawler actor has received invalid message ${invalid}");
+      Logger.info(s"PoisonPill $sender")
   }
+
+  private def getAdditionalMainPages(main: WSResponse): Future[Seq[WSResponse]] = Future(Seq(main))
+
+  private def getReviewsPages(c: Competitor, main: WSResponse): Future[Seq[WSResponse]] =
+    Future.sequence(Seq(httpClient.url(s"${c.url}/feedbacks?status=m&from=0").get()))
 }

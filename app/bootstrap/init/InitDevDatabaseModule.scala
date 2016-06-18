@@ -30,15 +30,15 @@ private[init] class InitDevDatabase @Inject()
   def insert(): Unit = {
     import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-    val insertInitialDataFuture = for {
-      count <- competitorsRepo.count() if count == 0
-      _ <- competitorsRepo.insert(InitDevDatabase.competitors)
-      _ <- reviewsRepo.insert(InitDevDatabase.reviews)
-      _ <- goodsRepo.insert(InitDevDatabase.goods)
-      _ <- chartsRepo.insert(InitDevDatabase.charts)
-    } yield ()
-
-    Try(Await.result(insertInitialDataFuture, Duration.Inf))
+//    val insertInitialDataFuture = for {
+//      count <- competitorsRepo.count() if count == 0
+//      _ <- competitorsRepo.insert(InitDevDatabase.competitors)
+//      _ <- reviewsRepo.insert(InitDevDatabase.reviews)
+//      _ <- goodsRepo.insert(InitDevDatabase.goods)
+//      _ <- chartsRepo.insert(InitDevDatabase.charts)
+//    } yield ()
+//
+//    Try(Await.result(insertInitialDataFuture, Duration.Inf))
   }
 
   insert()
