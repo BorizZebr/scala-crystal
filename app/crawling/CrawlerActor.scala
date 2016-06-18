@@ -38,6 +38,13 @@ class CrawlerActor @Inject()(
 
   private val httpClient: AhcWSClient = AhcWSClient()
 
+
+  @scala.throws[Exception](classOf[Exception])
+  override def postStop(): Unit = {
+    httpClient.close()
+    super.postStop()
+  }
+
   override def receive: Receive = {
     case CrawlCompetitor(c) =>
       for {
