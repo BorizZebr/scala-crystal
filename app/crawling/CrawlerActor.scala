@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import akka.actor._
 import akka.stream.Materializer
-import crawling.GoodsAnalizerActor.AnalizeGoods
+import crawling.GoodsAnalizerActor.{AnalizeGoods, AnalizeGoodsComplete}
 import models.Competitor
 import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
@@ -39,8 +39,9 @@ class CrawlerActor @Inject()(
   import CrawlerActor._
   import context.dispatcher
 
+  private var isReviewReady: Boolean = false
+  private var isGoodsReady: Boolean = false
   private val httpClient: AhcWSClient = AhcWSClient()
-
 
   @scala.throws[Exception](classOf[Exception])
   override def postStop(): Unit = {
@@ -78,11 +79,20 @@ class CrawlerActor @Inject()(
       }
 
     case AnalizeReviewsComplete =>
+      isReviewReady = true
       sender ! PoisonPill
-      context.parent ! CrawlComplete
-
       Logger.info(s"PoisonPill $sender")
+      sendCompleteIfReady()
+
+    case AnalizeGoodsComplete =>
+      isGoodsReady = true
+      sender ! PoisonPill
+      Logger.info(s"PoisonPill $sender")
+      sendCompleteIfReady()
   }
+
+  private def sendCompleteIfReady(): Unit =
+    if(isGoodsReady && isReviewReady) context.parent ! CrawlComplete
 
   private def getAdditionalMainPages(main: WSResponse): Future[Seq[WSResponse]] = Future(Seq(main))
 
