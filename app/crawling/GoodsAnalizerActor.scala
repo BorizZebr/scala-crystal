@@ -30,7 +30,7 @@ class GoodsAnalizerActor extends Actor {
     case AnalizeGoods(cmp, goods) =>
       val g = Jsoup.parse(goods.bodyAsUTF8)
       val res = g.select("div.b-item.b-item-hover").map { el => (
-        100500,
+        el.attr("id").replaceAll("[^\\d.]", "").toLong,
         el.select("div.title > a").text,
         el.select("span.price").text,
         el.select("img").attr("src"),

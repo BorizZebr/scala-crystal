@@ -27,7 +27,7 @@ class ReviewsAnalizerActor extends Actor {
   import ReviewsAnalizerActor._
   import scala.collection.JavaConversions._
 
-  val formatter: DateTimeFormatter = DateTimeFormat.shortDate()//.forPattern("dd.MM.yyyy")
+  val formatter: DateTimeFormatter = DateTimeFormat.forPattern("dd.MM.yyyy")
 
   override def receive: Receive = {
     case AnalizeReviews(cmp, reviews) =>
@@ -37,6 +37,8 @@ class ReviewsAnalizerActor extends Actor {
         r.select("div.grid-550.list-item-content > div.grid-auto.gray[title]").map(_.text),
         r.select("div.grid-530").map(_.text)).zipped.toSeq
       .map { el => Review(None, cmp.id, el._1, el._3, LocalDate.parse(el._2, formatter))}
+
+      val list = result toList
 
       sender ! AnalizeReviewsComplete(cmp, result)
       self ! PoisonPill
