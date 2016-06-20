@@ -1,7 +1,7 @@
 package bootstrap.akkaguice
 
 import com.google.inject.AbstractModule
-import crawling.{CompetitorsPersisterActor, CrawlMasterActor, CrawlerActor, GoodsAnalizerActor, ReviewsAnalizerActor}
+import crawling._
 import play.api.libs.concurrent.AkkaGuiceSupport
 
 /**
@@ -10,7 +10,7 @@ import play.api.libs.concurrent.AkkaGuiceSupport
 class AkkaGuiceModule extends AbstractModule with AkkaGuiceSupport {
   override def configure() = {
     bindActor[CrawlMasterActor]("crawl-master")
-    bindActor[CompetitorsPersisterActor]("competitors-persister")
+    bindActor[PersisterActor]("persister")
     bindActorFactory[CrawlerActor, CrawlerActor.Factory]
     bindActorFactory[ReviewsAnalizerActor, ReviewsAnalizerActor.Factory]
     bindActorFactory[GoodsAnalizerActor, GoodsAnalizerActor.Factory]

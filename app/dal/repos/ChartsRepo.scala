@@ -5,6 +5,7 @@ import javax.inject.{Inject, Singleton}
 
 import dal.components.{CompetitorsDependentComponent, CrudComponent, DalConfig, DatabaseComponent}
 import models.{Chart, ChartPoint}
+import org.joda.time.{DateTime, LocalDate}
 
 import scala.concurrent.Future
 
@@ -44,4 +45,10 @@ class ChartsRepo @Inject() (val dalConfig: DalConfig)
     }
   }
 
+  def getByCompetitorAndDate(competitorId: Long, date: LocalDate): Future[Option[Chart]] =
+    db.run(
+      table
+        .filter(x => x.competitorId === competitorId && x.date === date)
+        .result
+        .headOption)
 }

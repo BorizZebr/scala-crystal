@@ -8,16 +8,17 @@ import play.api.libs.functional.syntax._
   */
 package object controllers {
 
-  implicit val jodaDateWrites = Writes.jodaDateWrites("yyyy-MM-dd")
+  implicit val jodaDateWrites = Writes.jodaLocalDateWrites("yyyy-MM-dd")
   implicit val competitorsWrite = Json.writes[Competitor]
+  implicit val reviewWrite = Json.writes[Review]
   implicit val goodWrite = Json.writes[Good]
   implicit val chartPointWrite = Json.writes[ChartPoint]
 
-  val jodaDateForReviewWrites = Writes.jodaDateWrites("yyyy-MM-dd HH:mm")
-  implicit val reviewWrite: Writes[Review] = (
-    (__ \ "id").writeNullable[Long] ~
-    (__ \ "competitorId").writeNullable[Long] ~
-    (__ \ "author").write[String] ~
-    (__ \ "text").write[String] ~
-    (__ \ "date").write(jodaDateForReviewWrites))(unlift(Review.unapply))
+//  val jodaDateForReviewWrites = Writes.jodaDateWrites("yyyy-MM-dd HH:mm")
+//  implicit val reviewWrite: Writes[Review] = (
+//    (__ \ "id").writeNullable[Long] ~
+//    (__ \ "competitorId").writeNullable[Long] ~
+//    (__ \ "author").write[String] ~
+//    (__ \ "text").write[String] ~
+//    (__ \ "date").write(jodaDateForReviewWrites))(unlift(Review.unapply))
 }

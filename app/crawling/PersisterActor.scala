@@ -3,33 +3,40 @@ package crawling
 import javax.inject.Inject
 
 import akka.actor.{Actor, Props}
-import crawling.CompetitorsPersisterActor.PersistCompetitors
-import dal.repos.CompetitorsRepo
-import models.Competitor
+import dal.repos._
+import models._
+import org.joda.time.{DateTime, LocalDate}
 import play.api.{Configuration, Logger}
 
 import scala.collection.JavaConversions._
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by borisbondarenko on 14.06.16.
   */
-object CompetitorsPersisterActor {
+object PersisterActor {
 
-  def props = Props[CompetitorsPersisterActor]
+  def props = Props[PersisterActor]
 
-  case class PersistCompetitors()
+  case object PersistConfCompetitors
+  case class UpdateAmount(cmpId: Long, newAmount: Int, date: LocalDate)
+  case class UpdateReviews(reviews: Seq[Review])
+  case class UpdateGoods(goods: Seq[Good])
 }
 
-class CompetitorsPersisterActor @Inject()(
+class PersisterActor @Inject()(
     configuration: Configuration,
-    competitorsRepo: CompetitorsRepo)
+    competitorsRepo: CompetitorsRepo,
+    chartsRepo: ChartsRepo,
+    reviewsRepo: ReviewsRepo,
+    goodsRepo: GoodsRepo)
     extends Actor {
+
+  import PersisterActor._
 
   override def receive: Receive = {
 
-    case PersistCompetitors =>
+    case PersistConfCompetitors =>
       // read the conf
       configuration.underlying.getObjectList("competitors").foreach { co =>
         val name = co.unwrapped()("name").toString
@@ -50,5 +57,22 @@ class CompetitorsPersisterActor @Inject()(
             Logger.info(s"Competitor $name was created")
         }
       }
+
+    case UpdateAmount(cmpId, am, date) =>
+      chartsRepo.getByCompetitorAndDate(cmpId, date).map {
+        case None =>
+          val chart = Chart(None, Some(cmpId), am, LocalDate.now)
+          chartsRepo.insert(chart)
+
+        case Some(x) =>
+          val chart = Chart(x.id, x.competitorId, am, x.date)
+          chartsRepo.update(chart)
+      }
+
+    case UpdateReviews(reviews) =>
+      reviewsRepo.insert(reviews)
+
+    case UpdateGoods(goods) =>
+      goodsRepo.insert(goods)
   }
 }

@@ -2,7 +2,7 @@ package crawling
 
 import javax.inject.Inject
 
-import akka.actor.{Actor, PoisonPill, Props}
+import akka.actor.{Actor, Props}
 import crawling.CrawlMasterActor.CrawlAllCompetitors
 import dal.repos.{ChartsRepo, CompetitorsRepo, GoodsRepo, ReviewsRepo}
 import play.api.Logger
@@ -17,7 +17,7 @@ object CrawlMasterActor {
 
   def props = Props[CrawlMasterActor]
 
-  case class CrawlAllCompetitors()
+  case object CrawlAllCompetitors
 }
 
 class CrawlMasterActor @Inject()(
@@ -41,7 +41,5 @@ class CrawlMasterActor @Inject()(
       }
 
     case CrawlComplete =>
-      sender ! PoisonPill
-      Logger.info(s"PoisonPill $sender")
   }
 }

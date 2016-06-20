@@ -1,6 +1,6 @@
 package dal.components
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 
 import scala.concurrent.Future
 
@@ -14,8 +14,7 @@ trait CompetitorsDependentComponent extends TypedComponent
 
   trait CompetitorDependantColumns[B] extends Table[Entity] {
     def competitorId = column[Long]("COMPETITOR_ID")
-    def date = column[DateTime]("DATE")
-    // def competitor = foreignKey("DIR_FK", competitorId, TableQuery[CompetitorsTable])(_.id)
+    def date = column[LocalDate]("DATE")
   }
 
   override type EntityTable <: CompetitorDependantColumns[Entity]

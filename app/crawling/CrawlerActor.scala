@@ -1,11 +1,13 @@
 package crawling
 
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 
 import akka.actor._
 import akka.stream.Materializer
 import crawling.GoodsAnalizerActor.{AnalizeGoods, AnalizeGoodsComplete}
+import crawling.PersisterActor.{UpdateAmount, UpdateGoods, UpdateReviews}
 import models.Competitor
+import org.joda.time.{DateTime, LocalDate}
 import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 import play.api.libs.ws.WSResponse
@@ -26,11 +28,11 @@ object CrawlerActor {
   def props = Props[CrawlerActor]
 
   case class CrawlCompetitor(competitor: Competitor)
-
-  case class CrawlComplete()
+  case object CrawlComplete
 }
 
 class CrawlerActor @Inject()(
+    @Named("persister") persisterActor: ActorRef,
     reviewsAnalizersFactory: ReviewsAnalizerActor.Factory,
     goodsAnalizersFactory: GoodsAnalizerActor.Factory,
     implicit val mat: Materializer) extends Actor with InjectedActorSupport {
@@ -75,24 +77,27 @@ class CrawlerActor @Inject()(
         }
 
         // analize subscribers
-        val subscribersAmount = Jsoup.parse(main.bodyAsUTF8).select("#totalSubscribers").text toInt
+        val subscribersAmount = Jsoup.parse(main.bodyAsUTF8).select("#totalSubscribers").text.toInt
+        persisterActor ! UpdateAmount(c.id.get, subscribersAmount, LocalDate.now)
       }
 
-    case AnalizeReviewsComplete =>
+    case AnalizeReviewsComplete(cmp, reviews) =>
+      persisterActor ! UpdateReviews(reviews)
       isReviewReady = true
-      sender ! PoisonPill
-      Logger.info(s"PoisonPill $sender")
       sendCompleteIfReady()
 
-    case AnalizeGoodsComplete =>
+    case AnalizeGoodsComplete(cmp, goods) =>
+      persisterActor ! UpdateGoods(goods)
       isGoodsReady = true
-      sender ! PoisonPill
-      Logger.info(s"PoisonPill $sender")
       sendCompleteIfReady()
   }
 
   private def sendCompleteIfReady(): Unit =
-    if(isGoodsReady && isReviewReady) context.parent ! CrawlComplete
+    if(isGoodsReady && isReviewReady) {
+      context.parent ! CrawlComplete
+      self ! PoisonPill
+      Logger.info(s"PoisonPill $self")
+    }
 
   private def getAdditionalMainPages(main: WSResponse): Future[Seq[WSResponse]] = Future(Seq(main))
 

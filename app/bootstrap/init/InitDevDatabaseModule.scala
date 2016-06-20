@@ -3,9 +3,9 @@ package bootstrap.init
 import javax.inject.Inject
 
 import com.google.inject.AbstractModule
-import dal.repos.{ChartsRepo, GoodsRepo, ReviewsRepo, CompetitorsRepo}
-import models.{Chart, Good, Review, Competitor}
-import org.joda.time.DateTime
+import dal.repos.{ChartsRepo, CompetitorsRepo, GoodsRepo, ReviewsRepo}
+import models.{Chart, Competitor, Good, Review}
+import org.joda.time.{DateTime, LocalDate}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -85,10 +85,9 @@ private[init] object InitDevDatabase {
         c.id,
         author = LoremIpsum.words(2).split(' ').map(_ capitalize).mkString(" "),
         text = LoremIpsum.paragraphs(1),
-        DateTime.now.minusDays(rnd.nextInt(30)).minusMinutes(rnd.nextInt(30)))
+        LocalDate.now.minusDays(rnd.nextInt(30)))
     }
   } yield r
-
 
   val goods = for {
     c <- competitors
@@ -96,11 +95,12 @@ private[init] object InitDevDatabase {
       Good(
         None,
         c.id,
+        rnd.nextInt(100500),
         LoremIpsum.words(1) capitalize,
         rnd.nextDouble() * 1000,
         imgs(rnd.nextInt(imgs.length)),
         urls(rnd.nextInt(urls.length)),
-        DateTime.now)
+        LocalDate.now)
     }
   } yield g
 
@@ -111,7 +111,7 @@ private[init] object InitDevDatabase {
         None,
         c.id,
         rnd.nextInt(500),
-        DateTime.now.minusDays(x))
+        LocalDate.now.minusDays(x))
     }
   } yield p
 }

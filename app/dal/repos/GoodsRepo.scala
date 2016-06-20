@@ -5,6 +5,8 @@ import javax.inject.{Inject, Singleton}
 import dal.components.{CompetitorsDependentComponent, CrudComponent, DalConfig, DatabaseComponent}
 import models.Good
 
+import scala.concurrent.Future
+
 /**
   * Created by borisbondarenko on 27.05.16.
   */
@@ -20,14 +22,23 @@ class GoodsRepo @Inject() (val dalConfig: DalConfig)
     with IdColumn[Good]
     with CompetitorDependantColumns[Good] {
 
+    def extId = column[Long]("EXT_ID")
     def name = column[String]("NAME")
     def price = column[Double]("PRICE")
     def imgUrl = column[String]("IMG_URL")
     def url = column[String]("URL")
-    override def * = (id.?, competitorId.?, name, price, imgUrl, url, date) <>(Good.tupled, Good.unapply)
+    override def * = (id.?, competitorId.?, extId, name, price, imgUrl, url, date) <>(Good.tupled, Good.unapply)
   }
 
   override type Entity = Good
   override type EntityTable = GoodsTable
   override val table = TableQuery[GoodsTable]
+
+  override def getByCompetitor(competitorId: Long, skip: Int, take: Int): Future[Seq[Good]] =
+    db.run(table
+      .filter(_.competitorId === competitorId)
+      .sortBy(_.extId.desc)
+      .drop(skip)
+      .take(take)
+      .result)
 }

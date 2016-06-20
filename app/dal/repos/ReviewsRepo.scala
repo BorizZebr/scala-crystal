@@ -17,8 +17,8 @@ class ReviewsRepo @Inject() (val dalConfig: DalConfig)
   import driver.api._
 
   class ReviewsTable(tag: Tag) extends Table[Review](tag, "REVIEW")
-    with IdColumn[Review]
-    with CompetitorDependantColumns[Review] {
+      with IdColumn[Review]
+      with CompetitorDependantColumns[Review] {
 
     def author = column[String]("AUTHOR")
     def text = column[String]("TEXT")
