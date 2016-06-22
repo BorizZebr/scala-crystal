@@ -46,13 +46,20 @@ class PersisterActor @Inject()(
           // in case of we already have this comp, check the name
           // update if we need to
           case Some(comInDb) => if (comInDb.name != name) {
-            val comToUpdate = Competitor(comInDb.id, name, url, comInDb.lastCrawlStart, comInDb.lastCrawlFinish)
+            val comToUpdate = Competitor(
+              comInDb.id,
+              name,
+              url,
+              comInDb.lastCrawlStart,
+              comInDb.lastCrawlFinish,
+              comInDb.crawledGoodsPages,
+              comInDb.crawledReviewsPages)
             competitorsRepo.update(comToUpdate)
             Logger.info(s"Competitor ${comInDb.name} was renamed to $name")
           }
           // in case of none -- create in DB
           case None =>
-            val comToCreate = Competitor(None, name, url, None, None)
+            val comToCreate = Competitor(None, name, url, None, None, 0, 0)
             competitorsRepo.insert(comToCreate)
             Logger.info(s"Competitor $name was created")
         }

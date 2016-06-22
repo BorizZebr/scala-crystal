@@ -12,6 +12,10 @@ body {
     color: #d17581;
 }
 
+.goods {
+    border-bottom: 75px;
+}
+
 .thumbnail {
     padding: 0;
 }

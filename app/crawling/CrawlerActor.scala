@@ -7,14 +7,14 @@ import akka.stream.Materializer
 import crawling.GoodsAnalizerActor.{AnalizeGoods, AnalizeGoodsComplete}
 import crawling.PersisterActor.{UpdateAmount, UpdateGoods, UpdateReviews}
 import models.Competitor
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.LocalDate
+import org.jsoup.Jsoup
 import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 import play.api.libs.ws.WSResponse
 import play.api.libs.ws.ahc.AhcWSClient
 
 import scala.concurrent.Future
-import org.jsoup.Jsoup
 
 /**
   * Created by borisbondarenko on 04.06.16.
@@ -37,9 +37,11 @@ class CrawlerActor @Inject()(
     goodsAnalizersFactory: GoodsAnalizerActor.Factory,
     implicit val mat: Materializer) extends Actor with InjectedActorSupport {
 
-  import ReviewsAnalizerActor._
   import CrawlerActor._
+  import ReviewsAnalizerActor._
   import context.dispatcher
+  import org.jsoup.Jsoup
+  import scala.collection.JavaConversions._
 
   private var isReviewReady: Boolean = false
   private var isGoodsReady: Boolean = false
@@ -54,7 +56,7 @@ class CrawlerActor @Inject()(
   override def receive: Receive = {
     case CrawlCompetitor(c) =>
       for {
-        main <- httpClient.url(c.url).get()
+        main <- httpClient.url(s"${c.url}/?sortitems=4&v=0").get()
         goods <- getAdditionalMainPages(main)
         reviews <- getReviewsPages(c, main)
       } yield {
@@ -99,7 +101,19 @@ class CrawlerActor @Inject()(
       Logger.info(s"PoisonPill $self")
     }
 
-  private def getAdditionalMainPages(main: WSResponse): Future[Seq[WSResponse]] = Future(Seq(main))
+  private def getAdditionalMainPages(main: WSResponse): Future[Seq[WSResponse]] = {
+    val pageCount = Jsoup.parse(main.bodyAsUTF8).select("tbody > tr > td > a") match {
+      case x if x.isEmpty => 0
+      case x =>
+        x.map(_.text)
+          .filterNot(_.isEmpty)
+          .map(_.toInt)
+          .max
+    }
+
+
+    Future(Seq(main))
+  }
 
   private def getReviewsPages(c: Competitor, main: WSResponse): Future[Seq[WSResponse]] =
     Future.sequence(Seq(httpClient.url(s"${c.url}/feedbacks?status=m&from=0").get()))
