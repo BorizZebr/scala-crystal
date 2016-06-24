@@ -46,14 +46,7 @@ class PersisterActor @Inject()(
           // in case of we already have this comp, check the name
           // update if we need to
           case Some(comInDb) => if (comInDb.name != name) {
-            val comToUpdate = Competitor(
-              comInDb.id,
-              name,
-              url,
-              comInDb.lastCrawlStart,
-              comInDb.lastCrawlFinish,
-              comInDb.crawledGoodsPages,
-              comInDb.crawledReviewsPages)
+            val comToUpdate = comInDb.updateNameAndUrl(name, url)
             competitorsRepo.update(comToUpdate)
             Logger.info(s"Competitor ${comInDb.name} was renamed to $name")
           }
@@ -72,7 +65,7 @@ class PersisterActor @Inject()(
           chartsRepo.insert(chart)
 
         case Some(x) =>
-          val chart = Chart(x.id, x.competitorId, am, x.date)
+          val chart = x.updateAmount(am)
           chartsRepo.update(chart)
       }
 

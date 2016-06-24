@@ -111,7 +111,6 @@ class CrawlerActor @Inject()(
           .max
     }
 
-
     Future(Seq(main))
   }
 
