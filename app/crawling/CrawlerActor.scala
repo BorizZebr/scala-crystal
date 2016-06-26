@@ -8,7 +8,6 @@ import crawling.GoodsAnalizerActor.{AnalizeGoods, AnalizeGoodsComplete}
 import crawling.PersisterActor.{UpdateAmount, UpdateGoods, UpdateReviews}
 import models.Competitor
 import org.joda.time.LocalDate
-import org.jsoup.Jsoup
 import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 import play.api.libs.ws.WSResponse
@@ -41,6 +40,7 @@ class CrawlerActor @Inject()(
   import ReviewsAnalizerActor._
   import context.dispatcher
   import org.jsoup.Jsoup
+
   import scala.collection.JavaConversions._
 
   private var isReviewReady: Boolean = false
@@ -57,8 +57,9 @@ class CrawlerActor @Inject()(
     case CrawlCompetitor(c) =>
       for {
         main <- httpClient.url(s"${c.url}/?sortitems=4&v=0").get()
-        goods <- getAdditionalMainPages(main)
-        reviews <- getReviewsPages(c, main)
+        firstReviews <- httpClient.url(s"${c.url}/feedbacks").get()
+        goods <- getGoodsPages(c, main)
+        reviews <- getReviewsPages(c, firstReviews)
       } yield {
         // analize reviews
         reviews.zipWithIndex.foreach { case(r, idx) =>
@@ -101,19 +102,32 @@ class CrawlerActor @Inject()(
       Logger.info(s"PoisonPill $self")
     }
 
-  private def getAdditionalMainPages(main: WSResponse): Future[Seq[WSResponse]] = {
-    val pageCount = Jsoup.parse(main.bodyAsUTF8).select("tbody > tr > td > a") match {
+  private def getGoodsPages(c: Competitor, main: WSResponse): Future[Seq[WSResponse]] = {
+    val pageCount = getPagesCount(main)
+    val goods = (0 to (pageCount - c.crawledGoodsPages max 0)).map { i =>
+      httpClient.url(s"${c.url}?sortitems=0&v=0&from=${40 * i}").get()
+    }
+
+    Future.sequence(goods)
+  }
+
+  private def getReviewsPages(c: Competitor, rvws: WSResponse): Future[Seq[WSResponse]] = {
+    val pageCount = getPagesCount(rvws)
+    val reviews = (0 to (pageCount - c.crawledReviewsPages max 0)).map { i =>
+      httpClient.url(s"${c.url}/feedbacks?status=m&from=${40 * i}").get()
+    }
+
+    Future.sequence(reviews)
+  }
+
+  private def getPagesCount(resp: WSResponse): Int =
+    Jsoup.parse(resp.bodyAsUTF8).select("tbody > tr > td > a") match {
       case x if x.isEmpty => 0
       case x =>
         x.map(_.text)
+          .map(_.replaceAll("[^\\d.]", ""))
           .filterNot(_.isEmpty)
           .map(_.toInt)
           .max
     }
-
-    Future(Seq(main))
-  }
-
-  private def getReviewsPages(c: Competitor, main: WSResponse): Future[Seq[WSResponse]] =
-    Future.sequence(Seq(httpClient.url(s"${c.url}/feedbacks?status=m&from=0").get()))
 }

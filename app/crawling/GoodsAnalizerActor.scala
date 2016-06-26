@@ -29,14 +29,21 @@ class GoodsAnalizerActor extends Actor {
   override def receive: Receive = {
     case AnalizeGoods(cmp, goods) =>
       val g = Jsoup.parse(goods.bodyAsUTF8)
-      val res = g.select("div.b-item.b-item-hover").map { el => (
-        el.attr("id").replaceAll("[^\\d.]", "").toLong,
-        el.select("div.title > a").text,
-        el.select("span.price").text,
-        el.select("img").attr("src"),
-        "https://www.livemaster.ru/" + el.select("a").attr("href"))
-      }. map { el =>
-        Good(None, cmp.id, el._1, el._2, el._3.split(" ").head.toDouble, el._4, el._5, LocalDate.now)
+      val res = for (el <- g.select("div.b-item.b-item-hover")) yield {
+        val id = el.attr("id").replaceAll("[^\\d.]", "").toLong                  // id
+        val name = el.select("div.title > a").text                               // name
+        val price = el.select(".price").text.replaceAll("[^\\d.]", "")           // price
+        val imgUrl = el.select("img").attr("src")                                // img url
+        val itemUrl = "https://www.livemaster.ru/" + el.select("a").attr("href") // item url
+
+        Good(
+          None,
+          cmp.id,
+          id, name,
+          if (price.isEmpty) 0 else price.toDouble,
+          imgUrl,
+          itemUrl,
+          LocalDate.now)
       }
 
       sender ! AnalizeGoodsComplete(cmp, res)
