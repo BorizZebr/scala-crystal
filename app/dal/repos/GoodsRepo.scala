@@ -1,4 +1,5 @@
-package dal.repos
+package dal
+package repos
 
 import javax.inject.{Inject, Singleton}
 
@@ -48,5 +49,5 @@ class GoodsRepo @Inject() (val dalConfig: DalConfig)
         en.competitorId === entity.competitorId &&
         en.extId === entity.extId
       }.result.headOption
-    }.map(_.isEmpty)
+    }.map(_.isDefined)
 }

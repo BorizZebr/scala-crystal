@@ -70,9 +70,17 @@ class PersisterActor @Inject()(
       }
 
     case UpdateReviews(reviews) =>
-      reviewsRepo.insert(reviews)
+      for {
+        r <- reviews
+        c <- reviewsRepo.contains(r)
+        if !c
+      } reviewsRepo.insert(r)
 
     case UpdateGoods(goods) =>
-      goodsRepo.insert(goods)
+      for {
+        g <- goods
+        c <- goodsRepo.contains(g)
+        if !c
+      } goodsRepo.insert(g)
   }
 }

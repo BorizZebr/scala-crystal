@@ -45,6 +45,6 @@ class CompetitorsRepo @Inject() (val dalConfig: DalConfig)
         en.name === entity.name &&
         en.url === entity.url
       }.result.headOption
-    }.map(_.isEmpty)
+    }.map(_.isDefined)
 
 }

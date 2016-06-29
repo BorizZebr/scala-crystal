@@ -58,5 +58,5 @@ class ChartsRepo @Inject() (val dalConfig: DalConfig)
         en.competitorId === entity.competitorId &&
         en.date === entity.date
       }.result.headOption
-    }.map(_.isEmpty)
+    }.map(_.isDefined)
 }

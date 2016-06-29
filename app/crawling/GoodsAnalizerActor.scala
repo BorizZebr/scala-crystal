@@ -4,6 +4,7 @@ import akka.actor.{Actor, PoisonPill, Props}
 import models.{Competitor, Good}
 import org.joda.time.LocalDate
 import org.jsoup.Jsoup
+import play.api.Logger
 import play.api.libs.ws.WSResponse
 
 /**
@@ -17,8 +18,8 @@ object GoodsAnalizerActor {
 
   def props = Props[GoodsAnalizerActor]
 
-  case class AnalizeGoods(competitor: Competitor, goods: WSResponse)
-  case class AnalizeGoodsComplete(competitor: Competitor, goods: Seq[Good])
+  case class AnalizeGoods(competitorId: Option[Long], goods: WSResponse)
+  case class AnalizeGoodsComplete(competitorId: Option[Long], goods: Seq[Good])
 }
 
 class GoodsAnalizerActor extends Actor {
@@ -39,7 +40,7 @@ class GoodsAnalizerActor extends Actor {
 
         Good(
           None,
-          cmp.id,
+          cmp,
           id, name,
           if (price.isEmpty) 0 else price.toDouble,
           imgUrl,

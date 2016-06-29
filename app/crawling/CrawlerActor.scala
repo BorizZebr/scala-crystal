@@ -46,41 +46,48 @@ class CrawlerActor @Inject()(
   import scala.collection.JavaConversions._
 
   private val httpClient: AhcWSClient = AhcWSClient()
-  private var waitingFor = Set.empty[ActorRef]
+  private var waitingForReviews = Set.empty[ActorRef]
+  private var waitingForGoods = Set.empty[ActorRef]
 
   @scala.throws[Exception](classOf[Exception])
   override def postStop(): Unit = {
-    waitingFor = Set.empty
+    waitingForReviews = Set.empty
+    waitingForGoods = Set.empty
+
     httpClient.close()
     super.postStop()
   }
 
   override def receive: Receive = {
     case CrawlCompetitor =>
+
+      val mainFuture = httpClient.url(s"${c.url}/?sortitems=4&v=0").get()
+      val firstReviewsFuture = httpClient.url(s"${c.url}/feedbacks").get()
+
       for {
-        main <- httpClient.url(s"${c.url}/?sortitems=4&v=0").get()
-        firstReviews <- httpClient.url(s"${c.url}/feedbacks").get()
+        main <- mainFuture
+        firstReviews <- firstReviewsFuture
         goods <- getPages(main, c.crawledGoodsPages, "?sortitems=0&v=0&from=")
         reviews <- getPages(firstReviews, c.crawledReviewsPages, "/feedbacks?status=m&from=")
       } yield {
 
-        waitingFor ++=
+        val reviewsActors =
           reviews.zipWithIndex.map { case(r, idx) =>
             val name = s"reviews-analizer-${c.id.getOrElse(0)}-$idx-${System.nanoTime}"
-            val analizerActor = injectedChild(reviewsAnalizersFactory(), name)
-            analizerActor ! AnalizeReviews(c, r)
+            (injectedChild(reviewsAnalizersFactory(), name), r)
+          }
 
-            Logger.info(s"Analize reviews $name")
-            analizerActor
-          } ++
+        val goodsActors =
           goods.zipWithIndex.map { case(g, idx) =>
             val name = s"goods-analizer-${c.id.getOrElse(0)}-$idx-${System.nanoTime}"
-            val analizerActor = injectedChild(goodsAnalizersFactory(), name)
-            analizerActor ! AnalizeGoods(c, g)
-
-            Logger.info(s"Analize goods $name")
-            analizerActor
+            (injectedChild(goodsAnalizersFactory(), name), g)
           }
+
+        waitingForReviews ++= reviewsActors.map(_._1)
+        waitingForGoods ++= goodsActors.map(_._1)
+
+        reviewsActors.foreach(actor => actor._1 ! AnalizeReviews(c.id, actor._2))
+        goodsActors.foreach(actor => actor._1 ! AnalizeGoods(c.id, actor._2))
 
         // analize subscribers
         val subscribersAmount = Jsoup.parse(main.bodyAsUTF8).select("#totalSubscribers").text.toInt
@@ -89,16 +96,17 @@ class CrawlerActor @Inject()(
 
     case AnalizeReviewsComplete(cmp, reviews) =>
       persisterActor ! UpdateReviews(reviews)
-      sendCompleteIfReady(sender)
+      waitingForReviews -= sender
+      sendCompleteIfReady()
 
     case AnalizeGoodsComplete(cmp, goods) =>
       persisterActor ! UpdateGoods(goods)
-      sendCompleteIfReady(sender)
+      waitingForGoods -= sender
+      sendCompleteIfReady()
   }
 
-  private def sendCompleteIfReady(sndr: ActorRef): Unit =
-    waitingFor -= sender
-    if(waitingFor.isEmpty) {
+  private def sendCompleteIfReady(): Unit =
+    if (waitingForReviews.isEmpty && waitingForGoods.isEmpty) {
       context.parent ! CrawlComplete
       self ! PoisonPill
       Logger.info(s"PoisonPill $self")

@@ -18,8 +18,8 @@ object ReviewsAnalizerActor {
 
   def props = Props[ReviewsAnalizerActor]
 
-  case class AnalizeReviews(competitor: Competitor, reviews: WSResponse)
-  case class AnalizeReviewsComplete(competitot: Competitor, reviews: Seq[Review])
+  case class AnalizeReviews(competitorId: Option[Long], reviews: WSResponse)
+  case class AnalizeReviewsComplete(competitorId: Option[Long], reviews: Seq[Review])
 }
 
 class ReviewsAnalizerActor extends Actor {
@@ -36,7 +36,7 @@ class ReviewsAnalizerActor extends Actor {
         r.select("div.grid-content.wordwrap.text-desc > a").map(_.text),
         r.select("div.grid-550.list-item-content > div.grid-auto.gray[title]").map(_.text),
         r.select("div.grid-530").map(_.text)).zipped.toSeq
-      .map { el => Review(None, cmp.id, el._1, el._3, LocalDate.parse(el._2, formatter)) }
+      .map { el => Review(None, cmp, el._1, el._3, LocalDate.parse(el._2, formatter)) }
 
       val list = result.toList
 

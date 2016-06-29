@@ -1,4 +1,5 @@
-package dal.repos
+package dal
+package repos
 
 import javax.inject.{Inject, Singleton}
 
@@ -39,5 +40,5 @@ class ReviewsRepo @Inject() (val dalConfig: DalConfig)
         en.text === entity.text &&
         en.date === entity.date
       }.result.headOption
-    }.map(_.isEmpty)
+    }.map(_.isDefined)
 }
