@@ -41,4 +41,12 @@ class GoodsRepo @Inject() (val dalConfig: DalConfig)
       .drop(skip)
       .take(take)
       .result)
+
+  override def contains(entity: Good): Future[Boolean] =
+    db.run {
+      table.filter { en =>
+        en.competitorId === entity.competitorId &&
+        en.extId === entity.extId
+      }.result.headOption
+    }.map(_.isEmpty)
 }

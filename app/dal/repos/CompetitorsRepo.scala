@@ -38,4 +38,13 @@ class CompetitorsRepo @Inject() (val dalConfig: DalConfig)
 
   def getByUrl(url: String): Future[Option[Competitor]] =
     db.run(table.filter(_.url === url).result.headOption)
+
+  override def contains(entity: Competitor): Future[Boolean] =
+    db.run {
+      table.filter { en =>
+        en.name === entity.name &&
+        en.url === entity.url
+      }.result.headOption
+    }.map(_.isEmpty)
+
 }

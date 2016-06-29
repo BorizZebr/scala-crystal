@@ -51,4 +51,12 @@ class ChartsRepo @Inject() (val dalConfig: DalConfig)
         .filter(x => x.competitorId === competitorId && x.date === date)
         .result
         .headOption)
+
+  override def contains(entity: Chart): Future[Boolean] =
+    db.run {
+      table.filter { en =>
+        en.competitorId === entity.competitorId &&
+        en.date === entity.date
+      }.result.headOption
+    }.map(_.isEmpty)
 }

@@ -4,6 +4,7 @@ import javax.inject.{Inject, Named}
 
 import akka.actor._
 import akka.stream.Materializer
+import com.google.inject.assistedinject.Assisted
 import crawling.GoodsAnalizerActor.{AnalizeGoods, AnalizeGoodsComplete}
 import crawling.PersisterActor.{UpdateAmount, UpdateGoods, UpdateReviews}
 import models.Competitor
@@ -21,16 +22,17 @@ import scala.concurrent.Future
 object CrawlerActor {
 
   trait Factory {
-    def apply(): Actor
+    def apply(c: Competitor): Actor
   }
 
   def props = Props[CrawlerActor]
 
-  case class CrawlCompetitor(competitor: Competitor)
+  case object CrawlCompetitor
   case object CrawlComplete
 }
 
 class CrawlerActor @Inject()(
+    @Assisted c: Competitor,
     @Named("persister") persisterActor: ActorRef,
     reviewsAnalizersFactory: ReviewsAnalizerActor.Factory,
     goodsAnalizersFactory: GoodsAnalizerActor.Factory,
@@ -43,41 +45,42 @@ class CrawlerActor @Inject()(
 
   import scala.collection.JavaConversions._
 
-  private var isReviewReady: Boolean = false
-  private var isGoodsReady: Boolean = false
   private val httpClient: AhcWSClient = AhcWSClient()
+  private var waitingFor = Set.empty[ActorRef]
 
   @scala.throws[Exception](classOf[Exception])
   override def postStop(): Unit = {
+    waitingFor = Set.empty
     httpClient.close()
     super.postStop()
   }
 
   override def receive: Receive = {
-    case CrawlCompetitor(c) =>
+    case CrawlCompetitor =>
       for {
         main <- httpClient.url(s"${c.url}/?sortitems=4&v=0").get()
         firstReviews <- httpClient.url(s"${c.url}/feedbacks").get()
-        goods <- getGoodsPages(c, main)
-        reviews <- getReviewsPages(c, firstReviews)
+        goods <- getPages(main, c.crawledGoodsPages, "?sortitems=0&v=0&from=")
+        reviews <- getPages(firstReviews, c.crawledReviewsPages, "/feedbacks?status=m&from=")
       } yield {
-        // analize reviews
-        reviews.zipWithIndex.foreach { case(r, idx) =>
-          val name = s"reviews-analizer-${c.id.getOrElse(0)}-$idx-${System.nanoTime}"
-          val analizerActor = injectedChild(reviewsAnalizersFactory(), name)
-          analizerActor ! AnalizeReviews(c, r)
 
-          Logger.info(s"Analize reviews $name")
-        }
+        waitingFor ++=
+          reviews.zipWithIndex.map { case(r, idx) =>
+            val name = s"reviews-analizer-${c.id.getOrElse(0)}-$idx-${System.nanoTime}"
+            val analizerActor = injectedChild(reviewsAnalizersFactory(), name)
+            analizerActor ! AnalizeReviews(c, r)
 
-        // analize goods
-        goods.zipWithIndex.foreach { case(g, idx) =>
-          val name = s"goods-analizer-${c.id.getOrElse(0)}-$idx-${System.nanoTime}"
-          val analizerActor = injectedChild(goodsAnalizersFactory(), name)
-          analizerActor ! AnalizeGoods(c, g)
+            Logger.info(s"Analize reviews $name")
+            analizerActor
+          } ++
+          goods.zipWithIndex.map { case(g, idx) =>
+            val name = s"goods-analizer-${c.id.getOrElse(0)}-$idx-${System.nanoTime}"
+            val analizerActor = injectedChild(goodsAnalizersFactory(), name)
+            analizerActor ! AnalizeGoods(c, g)
 
-          Logger.info(s"Analize goods $name")
-        }
+            Logger.info(s"Analize goods $name")
+            analizerActor
+          }
 
         // analize subscribers
         val subscribersAmount = Jsoup.parse(main.bodyAsUTF8).select("#totalSubscribers").text.toInt
@@ -86,38 +89,28 @@ class CrawlerActor @Inject()(
 
     case AnalizeReviewsComplete(cmp, reviews) =>
       persisterActor ! UpdateReviews(reviews)
-      isReviewReady = true
-      sendCompleteIfReady()
+      sendCompleteIfReady(sender)
 
     case AnalizeGoodsComplete(cmp, goods) =>
       persisterActor ! UpdateGoods(goods)
-      isGoodsReady = true
-      sendCompleteIfReady()
+      sendCompleteIfReady(sender)
   }
 
-  private def sendCompleteIfReady(): Unit =
-    if(isGoodsReady && isReviewReady) {
+  private def sendCompleteIfReady(sndr: ActorRef): Unit =
+    waitingFor -= sender
+    if(waitingFor.isEmpty) {
       context.parent ! CrawlComplete
       self ! PoisonPill
       Logger.info(s"PoisonPill $self")
     }
 
-  private def getGoodsPages(c: Competitor, main: WSResponse): Future[Seq[WSResponse]] = {
-    val pageCount = getPagesCount(main)
-    val goods = (0 to (pageCount - c.crawledGoodsPages max 0)).map { i =>
-      httpClient.url(s"${c.url}?sortitems=0&v=0&from=${40 * i}").get()
+  private def getPages(mainPage: WSResponse, pagesCount: Int, url: String): Future[Seq[WSResponse]] = {
+    val pageCount = getPagesCount(mainPage)
+    Future.sequence {
+      (0 to (pageCount - pagesCount max 0)).map { i =>
+        httpClient.url(s"${c.url}$url${40 * i}").get()
+      }
     }
-
-    Future.sequence(goods)
-  }
-
-  private def getReviewsPages(c: Competitor, rvws: WSResponse): Future[Seq[WSResponse]] = {
-    val pageCount = getPagesCount(rvws)
-    val reviews = (0 to (pageCount - c.crawledReviewsPages max 0)).map { i =>
-      httpClient.url(s"${c.url}/feedbacks?status=m&from=${40 * i}").get()
-    }
-
-    Future.sequence(reviews)
   }
 
   private def getPagesCount(resp: WSResponse): Int =

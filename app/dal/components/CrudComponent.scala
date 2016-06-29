@@ -33,4 +33,6 @@ trait CrudComponent extends TypedComponent { self: DatabaseComponent =>
 
   def update(entity: Entity): Future[Unit] =
     db.run(table.insertOrUpdate(entity)).map(_ => ())
+
+  def contains(entity: Entity): Future[Boolean]
 }

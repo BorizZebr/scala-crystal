@@ -5,6 +5,8 @@ import javax.inject.{Inject, Singleton}
 import dal.components.{CompetitorsDependentComponent, CrudComponent, DalConfig, DatabaseComponent}
 import models.Review
 
+import scala.concurrent.Future
+
 /**
   * Created by borisbondarenko on 27.05.16.
   */
@@ -28,4 +30,14 @@ class ReviewsRepo @Inject() (val dalConfig: DalConfig)
   override type Entity = Review
   override type EntityTable = ReviewsTable
   override val table = TableQuery[ReviewsTable]
+
+  override def contains(entity: Review): Future[Boolean] =
+    db.run {
+      table.filter { en =>
+        en.competitorId === entity.competitorId &&
+        en.author === entity.author &&
+        en.text === entity.text &&
+        en.date === entity.date
+      }.result.headOption
+    }.map(_.isEmpty)
 }
