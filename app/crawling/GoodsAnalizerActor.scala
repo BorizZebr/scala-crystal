@@ -1,10 +1,9 @@
 package crawling
 
 import akka.actor.{Actor, PoisonPill, Props}
-import models.{Competitor, Good}
+import models.Good
 import org.joda.time.LocalDate
 import org.jsoup.Jsoup
-import play.api.Logger
 import play.api.libs.ws.WSResponse
 
 /**

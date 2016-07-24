@@ -2,8 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import dal.repos.{ChartsRepo, GoodsRepo, ReviewsRepo, CompetitorsRepo}
-import models.{ChartPoint, Good, Competitor, Review}
+import dal.repos.{ChartsRepo, CompetitorsRepo, GoodsRepo, ReviewsRepo}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc._

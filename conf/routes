@@ -5,8 +5,6 @@
 # Home page
 GET     /                           controllers.Application.index
 
-GET     /logs                       controllers.Application.logs
-
 GET     /competitors                controllers.Application.competitor
 
 GET     /chart/:id                  controllers.Application.chart(id: Long)
@@ -14,6 +12,12 @@ GET     /chart/:id                  controllers.Application.chart(id: Long)
 GET     /review/:id                 controllers.Application.review(id: Long, skip: Int ?= 0, take: Int ?= 10)
 
 GET     /goods/:id                  controllers.Application.goods(id: Long, skip: Int ?= 0, take: Int ?= 8)
+
+GET     /postPriceModels            controllers.PriceCalculator.priceModels
+
+GET     /getPrice/:model/:weight    controllers.PriceCalculator.getPrice(model, weight: Double)
+
+POST    /storePackage               controllers.PriceCalculator.storePackage
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

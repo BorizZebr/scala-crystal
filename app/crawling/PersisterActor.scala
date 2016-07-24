@@ -5,7 +5,7 @@ import javax.inject.Inject
 import akka.actor.{Actor, Props}
 import dal.repos._
 import models._
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.LocalDate
 import play.api.{Configuration, Logger}
 
 import scala.collection.JavaConversions._

@@ -36,3 +36,5 @@ case class Chart(id: Option[Long], competitorId: Option[Long], amount: Int, date
 }
 
 case class ChartPoint(x: LocalDate, amount: Int, change: Int)
+
+case class Pckg(weight: Double)
