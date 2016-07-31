@@ -3,7 +3,7 @@ package dal.components
 /**
   * Created by borisbondarenko on 27.05.16.
   */
-trait TypedComponent extends DateColumnMapper  { self: DatabaseComponent =>
+trait TypedComponent extends DateColumnMapper  { self: DalConfig =>
 
   import driver.api._
 

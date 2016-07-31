@@ -3,12 +3,9 @@ package crawling
 import javax.inject.Inject
 
 import akka.actor.{Actor, Props}
-import crawling.CrawlMasterActor.CrawlAllCompetitors
-import dal.repos.{ChartsRepo, CompetitorsRepo, GoodsRepo, ReviewsRepo}
+import dal.repos._
 import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by borisbondarenko on 04.06.16.
@@ -22,12 +19,14 @@ object CrawlMasterActor {
 
 class CrawlMasterActor @Inject()(
     crawlersFactory: CrawlerActor.Factory,
-    competitorsRepo: CompetitorsRepo,
-    reviewsRepo: ReviewsRepo,
-    goodsRepo: GoodsRepo,
-    chartsRepo: ChartsRepo) extends Actor with InjectedActorSupport{
+    competitorsRepo: CompetitorsDao,
+    reviewsRepo: ReviewsDao,
+    goodsRepo: GoodsDao,
+    chartsRepo: ChartsDao) extends Actor with InjectedActorSupport{
 
-  import CrawlerActor._
+  import CrawlMasterActor._
+  import crawling.CrawlerActor.{CrawlCompetitor, CrawlComplete}
+  import scala.concurrent.ExecutionContext.Implicits.global
 
   override def receive: Receive = {
 

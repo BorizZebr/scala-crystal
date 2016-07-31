@@ -2,17 +2,17 @@ package controllers
 
 import javax.inject.Inject
 
-import dal.repos.{ChartsRepo, CompetitorsRepo, GoodsRepo, ReviewsRepo}
+import dal.repos._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc._
 
 class Application @Inject()
 (
-  competitorsRepo: CompetitorsRepo,
-  reviewsRepo: ReviewsRepo,
-  goodsRepo: GoodsRepo,
-  chartsRepo: ChartsRepo) extends Controller {
+  competitorsRepo: CompetitorsDao,
+  reviewsRepo: ReviewsDao,
+  goodsRepo: GoodsDao,
+  chartsRepo: ChartsDao) extends Controller {
 
   /**
     * Index page controller

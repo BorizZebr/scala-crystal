@@ -3,9 +3,9 @@ package repos
 
 import javax.inject.{Inject, Singleton}
 
-import dal.components.{CompetitorsDependentComponent, CrudComponent, DalConfig, DatabaseComponent}
+import dal.components.{CompetitorsDependentComponent, CrudComponent, DalConfig}
 import models.{Chart, ChartPoint}
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.LocalDate
 
 import scala.concurrent.Future
 
@@ -13,10 +13,14 @@ import scala.concurrent.Future
   * Created by borisbondarenko on 27.05.16.
   */
 @Singleton
-class ChartsRepo @Inject() (val dalConfig: DalConfig)
-  extends DatabaseComponent
-  with CrudComponent
-  with CompetitorsDependentComponent {
+class ChartsRepo @Inject() (dalConfig: DalConfig)
+  extends RepoBase(dalConfig)
+  with ChartsDao {
+}
+
+trait ChartsDao
+    extends CrudComponent
+    with CompetitorsDependentComponent { self: DalConfig =>
 
   import driver.api._
 
@@ -34,7 +38,6 @@ class ChartsRepo @Inject() (val dalConfig: DalConfig)
   override val table: driver.api.TableQuery[EntityTable] = TableQuery[ChartsTable]
 
   def getPoints(competitorId: Long, skip: Int, take: Int): Future[Seq[ChartPoint]] = {
-
     getByCompetitor(competitorId, skip, take).map {
       case a if a.isEmpty => Nil
       case a =>
@@ -56,7 +59,7 @@ class ChartsRepo @Inject() (val dalConfig: DalConfig)
     db.run {
       table.filter { en =>
         en.competitorId === entity.competitorId &&
-        en.date === entity.date
+          en.date === entity.date
       }.result.headOption
     }.map(_.isDefined)
 }

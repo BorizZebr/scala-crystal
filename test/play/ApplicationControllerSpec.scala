@@ -1,6 +1,8 @@
-import dal.repos.{ChartsRepo, GoodsRepo, ReviewsRepo, CompetitorsRepo}
-import models.{ChartPoint, Good, Review}
-import org.joda.time.DateTime
+package play
+
+import dal.repos.{ChartsDao, CompetitorsDao, GoodsDao, ReviewsDao}
+import models._
+import org.joda.time.LocalDate
 import org.mockito.Matchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -16,25 +18,19 @@ import scala.concurrent.Future
 /**
   * Created by borisbondarenko on 26.05.16.
   */
-class ApplicationSpec extends PlaySpec
+class ApplicationControllerSpec extends PlaySpec
   with Results
   with MockitoSugar {
 
   "Application" should {
 
     import controllers._
-    import models.Competitor
-
-//    implicit val competitorWrite = Json.writes[Competitor]
-//    implicit val reviewWrite = Json.writes[Review]
-//    implicit val goodWrite = Json.writes[Good]
-//    implicit val chartWrite = Json.writes[ChartPoint]
 
     // Arrange
-    val mockCompetitorsRepo = mock[CompetitorsRepo]
-    val mockReviewsRepo = mock[ReviewsRepo]
-    val mockGoodsRepo = mock[GoodsRepo]
-    val mockChartsRepo = mock[ChartsRepo]
+    val mockCompetitorsRepo = mock[CompetitorsDao]
+    val mockReviewsRepo = mock[ReviewsDao]
+    val mockGoodsRepo = mock[GoodsDao]
+    val mockChartsRepo = mock[ChartsDao]
 
     val controller = new Application(
       mockCompetitorsRepo,
@@ -62,9 +58,9 @@ class ApplicationSpec extends PlaySpec
 
       // Arrange
       val rSeq = Seq(
-        Review(Some(1), Some(1), LoremIpsum.words(2), LoremIpsum.paragraph, DateTime.now),
-        Review(Some(2), Some(1), LoremIpsum.words(2), LoremIpsum.paragraph, DateTime.now),
-        Review(Some(3), Some(1), LoremIpsum.words(2), LoremIpsum.paragraph, DateTime.now))
+        Review(Some(1), Some(1), LoremIpsum.words(2), LoremIpsum.paragraph),
+        Review(Some(2), Some(1), LoremIpsum.words(2), LoremIpsum.paragraph),
+        Review(Some(3), Some(1), LoremIpsum.words(2), LoremIpsum.paragraph))
       when(mockReviewsRepo.getByCompetitor(anyInt, anyInt, anyInt)) thenReturn Future(rSeq)
 
       // Act
@@ -79,9 +75,9 @@ class ApplicationSpec extends PlaySpec
 
       // Arrange
       val gSeq = Seq(
-        Good(Some(1), Some(1), LoremIpsum.words(2), 123.321, LoremIpsum.word, LoremIpsum.word, DateTime.now),
-        Good(Some(2), Some(1), LoremIpsum.words(2), 4342.323, LoremIpsum.word, LoremIpsum.word, DateTime.now),
-        Good(Some(3), Some(1), LoremIpsum.words(2), 164.3431, LoremIpsum.word, LoremIpsum.word, DateTime.now))
+        Good(Some(1), Some(1), 1, LoremIpsum.words(2), 123.321, LoremIpsum.word, LoremIpsum.word),
+        Good(Some(2), Some(1), 2, LoremIpsum.words(2), 4342.323, LoremIpsum.word, LoremIpsum.word),
+        Good(Some(3), Some(1), 3, LoremIpsum.words(2), 164.3431, LoremIpsum.word, LoremIpsum.word))
       when(mockGoodsRepo.getByCompetitor(anyInt, anyInt, anyInt)) thenReturn Future(gSeq)
 
       // Act
@@ -92,12 +88,11 @@ class ApplicationSpec extends PlaySpec
     }
 
     "return charts valid" in {
-
       // Arrange
       val chSeq = Seq(
-        ChartPoint(DateTime.now, 1, 2),
-        ChartPoint(DateTime.now, 3, 4),
-        ChartPoint(DateTime.now, 5, 6))
+        ChartPoint(LocalDate.now, 1, 2),
+        ChartPoint(LocalDate.now, 3, 4),
+        ChartPoint(LocalDate.now, 5, 6))
       when(mockChartsRepo.getPoints(anyInt, anyInt, anyInt)) thenReturn Future(chSeq)
 
       // Act

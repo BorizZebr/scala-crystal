@@ -26,10 +26,10 @@ object PersisterActor {
 
 class PersisterActor @Inject()(
     configuration: Configuration,
-    competitorsRepo: CompetitorsRepo,
-    chartsRepo: ChartsRepo,
-    reviewsRepo: ReviewsRepo,
-    goodsRepo: GoodsRepo)
+    competitorsRepo: CompetitorsDao,
+    chartsRepo: ChartsDao,
+    reviewsRepo: ReviewsDao,
+    goodsRepo: GoodsDao)
     extends Actor {
 
   import PersisterActor._

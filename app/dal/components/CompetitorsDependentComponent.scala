@@ -8,7 +8,7 @@ import scala.concurrent.Future
   * Created by borisbondarenko on 27.05.16.
   */
 trait CompetitorsDependentComponent extends TypedComponent
-    { self: DatabaseComponent =>
+    { self: DalConfig =>
 
   import driver.api._
 

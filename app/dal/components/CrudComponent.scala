@@ -6,7 +6,7 @@ import scala.concurrent.Future
 /**
   * Created by borisbondarenko on 25.05.16.
   */
-trait CrudComponent extends TypedComponent { self: DatabaseComponent =>
+trait CrudComponent extends TypedComponent { self: DalConfig =>
 
   import driver.api._
 

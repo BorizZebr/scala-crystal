@@ -22,7 +22,9 @@ libraryDependencies ++= Seq( cache , ws, //jdbc,
   "org.mockito" % "mockito-core" % "1.10.19" % "test"
 )
 
-unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )  
+unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
+
+javaOptions in Test += "-Dconfig.file=conf/application.test.conf"
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"  
 

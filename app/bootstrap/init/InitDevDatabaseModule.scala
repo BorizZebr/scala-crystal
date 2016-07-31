@@ -3,13 +3,9 @@ package bootstrap.init
 import javax.inject.Inject
 
 import com.google.inject.AbstractModule
-import dal.repos.{ChartsRepo, CompetitorsRepo, GoodsRepo, ReviewsRepo}
+import dal.repos._
 import models.{Chart, Competitor, Good, Review}
-import org.joda.time.{DateTime, LocalDate}
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-import scala.util.Try
+import org.joda.time.LocalDate
 
 /**
   * Created by borisbondarenko on 25.05.16.
@@ -22,13 +18,12 @@ class InitDevDatabaseModule extends AbstractModule {
 
 private[init] class InitDevDatabase @Inject()
 (
-  competitorsRepo: CompetitorsRepo,
-  reviewsRepo: ReviewsRepo,
-  goodsRepo: GoodsRepo,
-  chartsRepo: ChartsRepo) {
+  competitorsRepo: CompetitorsDao,
+  reviewsRepo: ReviewsDao,
+  goodsRepo: GoodsDao,
+  chartsRepo: ChartsDao) {
 
   def insert(): Unit = {
-    import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 //    val insertInitialDataFuture = for {
 //      count <- competitorsRepo.count() if count == 0

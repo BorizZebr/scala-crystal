@@ -13,9 +13,9 @@ GET     /review/:id                 controllers.Application.review(id: Long, ski
 
 GET     /goods/:id                  controllers.Application.goods(id: Long, skip: Int ?= 0, take: Int ?= 8)
 
-GET     /postPriceModels            controllers.PriceCalculator.priceModels
+GET     /pricemodels                controllers.PriceCalculator.priceModels
 
-GET     /getPrice/:model/:weight    controllers.PriceCalculator.getPrice(model, weight: Double)
+GET     /price/:model/:weight       controllers.PriceCalculator.price(model, weight: Double)
 
 POST    /storePackage               controllers.PriceCalculator.storePackage
 

@@ -3,7 +3,7 @@ package repos
 
 import javax.inject.{Inject, Singleton}
 
-import dal.components.{CrudComponent, DalConfig, DatabaseComponent}
+import dal.components.{CrudComponent, DalConfig}
 import models.Competitor
 import org.joda.time.DateTime
 
@@ -13,9 +13,12 @@ import scala.concurrent.Future
   * Created by borisbondarenko on 26.05.16.
   */
 @Singleton()
-class CompetitorsRepo @Inject() (val dalConfig: DalConfig)
-  extends DatabaseComponent
-  with CrudComponent {
+class CompetitorsRepo @Inject() (dalConfig: DalConfig)
+    extends RepoBase(dalConfig)
+    with CompetitorsDao {
+}
+
+trait CompetitorsDao extends CrudComponent { self: DalConfig =>
 
   import driver.api._
 
@@ -43,8 +46,7 @@ class CompetitorsRepo @Inject() (val dalConfig: DalConfig)
     db.run {
       table.filter { en =>
         en.name === entity.name &&
-        en.url === entity.url
+          en.url === entity.url
       }.result.headOption
     }.map(_.isDefined)
-
 }

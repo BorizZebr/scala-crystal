@@ -15,7 +15,6 @@ class DataAccessConfig @Inject() (dbConfigProvider: DatabaseConfigProvider) exte
   private val cfg = dbConfigProvider.get[JdbcProfile]
 
   override val db = cfg.db
-
   override val driver = cfg.driver
 }
 

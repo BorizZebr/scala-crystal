@@ -9,7 +9,7 @@ import slick.driver.JdbcProfile
 /**
   * Created by borisbondarenko on 25.05.16.
   */
-trait DateColumnMapper { self: DatabaseComponent =>
+trait DateColumnMapper { self: DalConfig =>
 
   import driver.api._
 

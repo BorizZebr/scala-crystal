@@ -14,4 +14,7 @@ package object controllers {
 
   implicit val packageWrite = Json.writes[Pckg]
   implicit val packageReads = Json.reads[Pckg]
+
+  implicit val priceInfoWrite = Json.writes[PriceResponse]
+  implicit val priceInfoReads = Json.reads[PriceResponse]
 }

@@ -3,7 +3,7 @@ package repos
 
 import javax.inject.{Inject, Singleton}
 
-import dal.components.{CompetitorsDependentComponent, CrudComponent, DalConfig, DatabaseComponent}
+import dal.components.{CompetitorsDependentComponent, CrudComponent, DalConfig}
 import models.Good
 
 import scala.concurrent.Future
@@ -12,10 +12,14 @@ import scala.concurrent.Future
   * Created by borisbondarenko on 27.05.16.
   */
 @Singleton
-class GoodsRepo @Inject() (val dalConfig: DalConfig)
-  extends DatabaseComponent
-  with CrudComponent
-  with CompetitorsDependentComponent {
+class GoodsRepo @Inject() (dalConfig: DalConfig)
+  extends RepoBase(dalConfig)
+  with GoodsDao {
+}
+
+trait GoodsDao
+    extends CrudComponent
+    with CompetitorsDependentComponent { self: DalConfig =>
 
   import driver.api._
 
@@ -47,7 +51,7 @@ class GoodsRepo @Inject() (val dalConfig: DalConfig)
     db.run {
       table.filter { en =>
         en.competitorId === entity.competitorId &&
-        en.extId === entity.extId
+          en.extId === entity.extId
       }.result.headOption
     }.map(_.isDefined)
 }
