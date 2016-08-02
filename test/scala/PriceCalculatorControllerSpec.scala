@@ -1,4 +1,4 @@
-package play
+package scala
 
 import controllers._
 import models.{Pckg, PriceResponse}
@@ -8,7 +8,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 import play.api.mvc.Results
-import play.api.test.{FakeHeaders, FakeRequest}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.PriceCalculatorService
 

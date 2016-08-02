@@ -23,7 +23,7 @@ trait ReviewsDao
 
   import driver.api._
 
-  class ReviewsTable(tag: Tag) extends Table[Review](tag, "REVIEW")
+  class ReviewsTable(tag: Tag) extends Table[Review](tag, tableName)
     with IdColumn[Review]
     with CompetitorDependantColumns[Review] {
 
@@ -35,6 +35,7 @@ trait ReviewsDao
   override type Entity = Review
   override type EntityTable = ReviewsTable
   override val table = TableQuery[ReviewsTable]
+  override val tableName = "REVIEW"
 
   override def contains(entity: Review): Future[Boolean] =
     db.run {

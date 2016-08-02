@@ -1,4 +1,4 @@
-package play
+package scala
 
 import controllers._
 import models.Pckg

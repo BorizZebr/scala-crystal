@@ -10,4 +10,5 @@ trait TypedComponent extends DateColumnMapper  { self: DalConfig =>
   type Entity
   type EntityTable <: Table[Entity]
   val table: TableQuery[EntityTable]
+  val tableName: String
 }

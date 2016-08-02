@@ -24,7 +24,7 @@ trait ChartsDao
 
   import driver.api._
 
-  class ChartsTable(tag: Tag) extends Table[Chart](tag, "CHART")
+  class ChartsTable(tag: Tag) extends Table[Chart](tag, tableName)
     with IdColumn[Chart]
     with CompetitorDependantColumns[Chart] {
 
@@ -36,6 +36,7 @@ trait ChartsDao
   override type EntityTable = ChartsTable
   override type Entity = Chart
   override val table: driver.api.TableQuery[EntityTable] = TableQuery[ChartsTable]
+  override val tableName = "CHART"
 
   def getPoints(competitorId: Long, skip: Int, take: Int): Future[Seq[ChartPoint]] = {
     getByCompetitor(competitorId, skip, take).map {

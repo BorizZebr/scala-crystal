@@ -23,7 +23,7 @@ trait GoodsDao
 
   import driver.api._
 
-  class GoodsTable(tag: Tag) extends Table[Good](tag, "GOOD")
+  class GoodsTable(tag: Tag) extends Table[Good](tag, tableName)
     with IdColumn[Good]
     with CompetitorDependantColumns[Good] {
 
@@ -38,6 +38,7 @@ trait GoodsDao
   override type Entity = Good
   override type EntityTable = GoodsTable
   override val table = TableQuery[GoodsTable]
+  override val tableName = "GOOD"
 
   override def getByCompetitor(competitorId: Long, skip: Int, take: Int): Future[Seq[Good]] =
     db.run(table

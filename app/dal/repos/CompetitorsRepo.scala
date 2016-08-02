@@ -22,7 +22,7 @@ trait CompetitorsDao extends CrudComponent { self: DalConfig =>
 
   import driver.api._
 
-  class CompetitorsTable(tag: Tag) extends Table[Competitor](tag, "COMPETITOR")
+  class CompetitorsTable(tag: Tag) extends Table[Competitor](tag, tableName)
     with IdColumn[Competitor] {
 
     def name = column[String]("NAME")
@@ -38,6 +38,7 @@ trait CompetitorsDao extends CrudComponent { self: DalConfig =>
   override type Entity = Competitor
   override type EntityTable = CompetitorsTable
   override val table = TableQuery[CompetitorsTable]
+  override val tableName = "COMPETITOR"
 
   def getByUrl(url: String): Future[Option[Competitor]] =
     db.run(table.filter(_.url === url).result.headOption)
