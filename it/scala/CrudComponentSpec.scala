@@ -12,7 +12,7 @@ import scala.concurrent.duration.Duration
   */
 class CrudComponentSpec extends FunSpec
   with DalSpec
-  with TestDao
+  with TestCrudDao
   with DalMatchers
   with MustMatchers
   with ScalaFutures {
@@ -49,12 +49,10 @@ class CrudComponentSpec extends FunSpec
       3 -> TestEntity(Option(3), "Test-3"))
 
     def init() = {
-      val initSeq = DBIO.seq(
-        // Insert some suppliers
-        sqlu"insert into #$tableName values(1, 'Test-1')",
-        sqlu"insert into #$tableName values(2, 'Test-2')",
-        sqlu"insert into #$tableName values(3, 'Test-3')"
-      )
+      val initSeq = DBIO.sequence(
+        testSeq.values.map { el =>
+          sqlu"insert into #$tableName values(#${el.id.get}, '#${el.name}')"
+        })
       Await.result(db.run(initSeq), Duration.Inf)
     }
 

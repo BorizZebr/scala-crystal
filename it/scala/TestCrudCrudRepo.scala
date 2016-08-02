@@ -8,12 +8,12 @@ import scala.concurrent.Future
 /**
   * Created by borisbondarenko on 26.05.16.
   */
-class TestRepo (dalConfig: DalConfig)
+class TestCrudCrudRepo (dalConfig: DalConfig)
   extends RepoBase(dalConfig)
-    with TestDao {
+    with TestCrudDao {
 }
 
-trait TestDao extends CrudComponent { self: DalConfig =>
+trait TestCrudDao extends CrudComponent { self: DalConfig =>
   
   import driver.api._
 
