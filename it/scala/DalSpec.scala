@@ -28,13 +28,15 @@ trait DalSpec extends Suite
     val reviewsRepo = new ReviewsRepo(this)
     val chartsRepo = new ChartsRepo(this)
     val goodsRepo = new GoodsRepo(this)
+    val testRepo = new TestRepo(this)
 
     val init = {
       val initSeq = DBIO.seq(
         competitorsRepo.table.schema.create,
         reviewsRepo.table.schema.create,
         chartsRepo.table.schema.create,
-        goodsRepo.table.schema.create)
+        goodsRepo.table.schema.create,
+        testRepo.table.schema.create)
       db.run(initSeq)
     }
     Await.result(init, Duration.Inf)
@@ -45,13 +47,15 @@ trait DalSpec extends Suite
     val reviewsRepo = new ReviewsRepo(this)
     val chartsRepo = new ChartsRepo(this)
     val goodsRepo = new GoodsRepo(this)
+    val testRepo = new TestRepo(this)
 
     val drop = {
       val dropSeq = DBIO.seq(
         competitorsRepo.table.schema.drop,
         reviewsRepo.table.schema.drop,
         chartsRepo.table.schema.drop,
-        goodsRepo.table.schema.drop)
+        goodsRepo.table.schema.drop,
+        testRepo.table.schema.drop)
       db.run(dropSeq)
     }
     Await.result(drop, Duration.Inf)

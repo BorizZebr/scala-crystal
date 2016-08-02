@@ -19,14 +19,5 @@ class CompetitorsDaoSpec extends FunSpec
 
   import driver.api._
 
-  describe("empty repo") {
-    it("should be able to put new competitor") {
-      // Act
-      val res: Future[Unit] = insert(Competitor(None, "testtesttest", "url"))
-      // Assert
-      whenReady(res) { _ =>
-        result(db.run(sql"""SELECT COUNT(*) FROM #$tableName""".as[Int])).head mustEqual 1
-      }
-    }
-  }
+
 }

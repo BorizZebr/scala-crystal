@@ -32,7 +32,7 @@ unmanagedSourceDirectories in IntegrationTest <<=
 
 javaOptions in Test += "-Dconfig.file=conf/application.test.conf"
 
-parallelExecution in IntegrationTest := false
+parallelExecution in Test := false
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"  
 

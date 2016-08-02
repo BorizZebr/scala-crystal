@@ -22,7 +22,7 @@ trait CrudComponent extends TypedComponent { self: DalConfig =>
   def getById(id: Long): Future[Option[Entity]] =
     db.run(table.filter(_.id === id).result.headOption)
 
-  def count(): Future[Int] =
+  def count: Future[Int] =
     db.run(table.map(_.id).length.result)
 
   def insert(entity: Entity): Future[Unit] =
