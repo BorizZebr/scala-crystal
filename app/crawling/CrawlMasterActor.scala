@@ -2,7 +2,7 @@ package crawling
 
 import javax.inject.Inject
 
-import akka.actor.{Actor, Props}
+import akka.actor.{Actor, ActorRef, Props}
 import dal.repos._
 import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
@@ -15,17 +15,16 @@ object CrawlMasterActor {
   def props = Props[CrawlMasterActor]
 
   case object CrawlAllCompetitors
+
+  case object CrawlComplete
 }
 
 class CrawlMasterActor @Inject()(
     crawlersFactory: CrawlerActor.Factory,
-    competitorsRepo: CompetitorsDao,
-    reviewsRepo: ReviewsDao,
-    goodsRepo: GoodsDao,
-    chartsRepo: ChartsDao) extends Actor with InjectedActorSupport{
+    competitorsRepo: CompetitorsDao) extends Actor with InjectedActorSupport{
 
   import CrawlMasterActor._
-  import crawling.CrawlerActor.{CrawlCompetitor, CrawlComplete}
+  import crawling.CrawlerActor.CrawlCompetitor
   import scala.concurrent.ExecutionContext.Implicits.global
 
   override def receive: Receive = {
@@ -33,8 +32,8 @@ class CrawlMasterActor @Inject()(
     case CrawlAllCompetitors =>
       for(cmttrs <- competitorsRepo.getAll) cmttrs.foreach { cmp =>
         val name = s"crawler-${cmp.id.getOrElse(0)}-${System.nanoTime}"
-        val crawlerActor = injectedChild(crawlersFactory(cmp), name)
-        crawlerActor ! CrawlCompetitor
+        val crawlerActor = injectedChild(crawlersFactory(), name)
+        crawlerActor ! CrawlCompetitor(cmp)
 
         Logger.info(s"Crawl $name")
       }

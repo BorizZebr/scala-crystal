@@ -19,10 +19,12 @@ libraryDependencies ++= Seq( cache , ws,
   // crawling
   "org.jsoup" % "jsoup" % "1.9.2",
   // test
+  "com.typesafe.akka" %% "akka-testkit" % "2.4.8" % "test",
   "org.scalatest" %% "scalatest" % "2.2.6" % "it,test",
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0" % "it,test",
   "org.eu.acolyte" %% "jdbc-scala" % "1.0.36-j7p" % "it,test",
-  "org.mockito" % "mockito-core" % "1.10.19" % "it,test"
+  "org.mockito" % "mockito-core" % "1.10.19" % "it,test",
+  "org.slf4j" % "slf4j-nop" % "1.6.4"
 )
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
@@ -32,7 +34,7 @@ unmanagedSourceDirectories in IntegrationTest <<=
 
 javaOptions in Test += "-Dconfig.file=conf/application.test.conf"
 
-parallelExecution in Test := false
+parallelExecution in IntegrationTest := false
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"  
 

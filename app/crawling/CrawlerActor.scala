@@ -22,22 +22,21 @@ import scala.concurrent.Future
 object CrawlerActor {
 
   trait Factory {
-    def apply(c: Competitor): Actor
+    def apply(): Actor
   }
 
   def props = Props[CrawlerActor]
 
-  case object CrawlCompetitor
-  case object CrawlComplete
+  case class CrawlCompetitor(c: Competitor)
 }
 
 class CrawlerActor @Inject()(
-    @Assisted c: Competitor,
     @Named("persister") persisterActor: ActorRef,
     reviewsAnalizersFactory: ReviewsAnalizerActor.Factory,
     goodsAnalizersFactory: GoodsAnalizerActor.Factory,
     implicit val mat: Materializer) extends Actor with InjectedActorSupport {
 
+  import CrawlMasterActor._
   import CrawlerActor._
   import ReviewsAnalizerActor._
   import context.dispatcher
@@ -59,7 +58,7 @@ class CrawlerActor @Inject()(
   }
 
   override def receive: Receive = {
-    case CrawlCompetitor =>
+    case CrawlCompetitor(c) =>
 
       val mainFuture = httpClient.url(s"${c.url}/?sortitems=4&v=0").get()
       val firstReviewsFuture = httpClient.url(s"${c.url}/feedbacks").get()
@@ -67,8 +66,8 @@ class CrawlerActor @Inject()(
       for {
         main <- mainFuture
         firstReviews <- firstReviewsFuture
-        goods <- getPages(main, c.crawledGoodsPages, "?sortitems=0&v=0&from=")
-        reviews <- getPages(firstReviews, c.crawledReviewsPages, "/feedbacks?status=m&from=")
+        goods <- getPages(main, c.crawledGoodsPages, c.url, "?sortitems=0&v=0&from=")
+        reviews <- getPages(firstReviews, c.crawledReviewsPages, c.url, "/feedbacks?status=m&from=")
       } yield {
 
         val reviewsActors =
@@ -112,11 +111,11 @@ class CrawlerActor @Inject()(
       Logger.info(s"PoisonPill $self")
     }
 
-  private def getPages(mainPage: WSResponse, pagesCount: Int, url: String): Future[Seq[WSResponse]] = {
+  private def getPages(mainPage: WSResponse, pagesCount: Int, cUrl: String, url: String): Future[Seq[WSResponse]] = {
     val pageCount = getPagesCount(mainPage)
     Future.sequence {
       (0 to (pageCount - pagesCount max 0)).map { i =>
-        httpClient.url(s"${c.url}$url${40 * i}").get()
+        httpClient.url(s"$cUrl$url${40 * i}").get()
       }
     }
   }
