@@ -18,10 +18,11 @@ class GuiceModule extends AbstractModule with AkkaGuiceSupport {
     bind(classOf[GoodsDao]).to(classOf[GoodsRepo])
 
     bindActor[CrawlMasterActor]("crawl-master")
-    bindActor[PersisterActor]("persister")
+    bindActor[CompetitorsBootstraperActor]("cmpttr-btstrpr")
     bindActorFactory[CrawlerActor, CrawlerActor.Factory]
     bindActorFactory[ReviewsAnalizerActor, ReviewsAnalizerActor.Factory]
     bindActorFactory[GoodsAnalizerActor, GoodsAnalizerActor.Factory]
+    bindActorFactory[PersisterActor, PersisterActor.Factory]
   }
 }
 

@@ -31,9 +31,9 @@ object CrawlerActor {
 }
 
 class CrawlerActor @Inject()(
-    @Named("persister") persisterActor: ActorRef,
     reviewsAnalizersFactory: ReviewsAnalizerActor.Factory,
     goodsAnalizersFactory: GoodsAnalizerActor.Factory,
+    persisterFactory: PersisterActor.Factory,
     implicit val mat: Materializer) extends Actor with InjectedActorSupport {
 
   import CrawlMasterActor._

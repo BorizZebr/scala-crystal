@@ -4,7 +4,7 @@ import javax.inject.{Inject, Named}
 
 import akka.actor.{ActorRef, ActorSystem}
 import com.google.inject.AbstractModule
-import crawling.PersisterActor.PersistConfCompetitors
+import crawling.CompetitorsBootstraperActor.BootstrapCompetitors
 import crawling.CrawlMasterActor.CrawlAllCompetitors
 import org.joda.time.DateTime
 
@@ -23,10 +23,9 @@ class CrawlingBootstrapModule extends AbstractModule {
 private[crawling] class CrawlingBoostrap @Inject()(
     system: ActorSystem,
     @Named("crawl-master") crawlMasterActor: ActorRef,
-    @Named("persister") persisterActor: ActorRef) {
+    @Named("cmpttr-btstrpr") competitorsBootstrapActor: ActorRef) {
 
-  system.scheduler.schedule(3 seconds, 1 minutes, persisterActor, PersistConfCompetitors)
-
+  system.scheduler.schedule(3 seconds, 1 minutes, competitorsBootstrapActor, BootstrapCompetitors)
   system.scheduler.scheduleOnce(10 seconds, crawlMasterActor, CrawlAllCompetitors)
 
   val delay = DateTime.now.plusDays(1).withTimeAtStartOfDay.getMillis - System.currentTimeMillis()

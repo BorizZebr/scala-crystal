@@ -1,17 +1,13 @@
 package scala.crawling
 
-import java.util.concurrent.{BlockingDeque, LinkedBlockingDeque}
-
-import akka.actor.Actor.Receive
-import akka.actor.{Actor, ActorSystem, Props}
-import akka.testkit.{ImplicitSender, TestActor, TestActorRef, TestKit, TestProbe}
-import org.mockito.Matchers.{eq => eqTo, _}
-import org.mockito.Mockito._
+import akka.actor.{ActorSystem, Props}
+import akka.testkit.{ImplicitSender, TestKit, TestProbe}
 import crawling.CrawlMasterActor.CrawlAllCompetitors
 import crawling.CrawlerActor
 import crawling.CrawlerActor.CrawlCompetitor
 import dal.repos.CompetitorsDao
 import models.Competitor
+import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 
@@ -28,6 +24,7 @@ class CrawlMasterActorSpec(_system: ActorSystem) extends TestKit(_system)
     with ImplicitSender {
 
   import crawling.CrawlMasterActor
+
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def this() = this(ActorSystem("CrawlMasterActorSpec"))
@@ -41,7 +38,7 @@ class CrawlMasterActorSpec(_system: ActorSystem) extends TestKit(_system)
     // Arrange
     val t = TestProbe()
     when(competitorsRepoMock.getAll) thenReturn Future(Nil)
-    val actor = system.actorOf(Props(new CrawlMasterActor(factoryMock, competitorsRepoMock)))
+    val actor = system.actorOf(Props(classOf[CrawlMasterActor], factoryMock, competitorsRepoMock))
 
     // Act
     actor ! CrawlAllCompetitors
@@ -53,23 +50,17 @@ class CrawlMasterActorSpec(_system: ActorSystem) extends TestKit(_system)
   it should "recieve CrawlAllCompetitors and send CrawlCompetitor to created children" in {
     // Arrange
     val t = TestProbe()
-    val tActor = t.ref
-
-    object FakeCrawlerFactory extends CrawlerActor.Factory {
-      override def apply() = new FakeActor()
-      class FakeActor extends Actor {
-        override def receive: Receive = {
-          case msg => tActor ! msg
-        }
-      }
-    }
 
     val testSeq = Seq(
       Competitor(Option(1), "name-1", "url-1"),
       Competitor(Option(2), "name-2", "url-2"),
       Competitor(Option(3), "name-3", "url-3"))
     when(competitorsRepoMock.getAll) thenReturn Future(testSeq)
-    val actor = system.actorOf(Props(new CrawlMasterActor(FakeCrawlerFactory, competitorsRepoMock)))
+
+    val actor = system.actorOf(
+      Props(classOf[CrawlMasterActor],
+      new FakeActorFactory(t.ref) with CrawlerActor.Factory,
+      competitorsRepoMock))
 
     // Act
     actor ! CrawlAllCompetitors
