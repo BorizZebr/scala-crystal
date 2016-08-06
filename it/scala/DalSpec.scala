@@ -28,7 +28,7 @@ trait DalSpec extends Suite
     val reviewsRepo = new ReviewsRepo(this)
     val chartsRepo = new ChartsRepo(this)
     val goodsRepo = new GoodsRepo(this)
-    val testRepo = new TestCrudCrudRepo(this)
+    val testRepo = new TestCrudRepo(this)
 
     val init = {
       val initSeq = DBIO.seq(
@@ -47,7 +47,7 @@ trait DalSpec extends Suite
     val reviewsRepo = new ReviewsRepo(this)
     val chartsRepo = new ChartsRepo(this)
     val goodsRepo = new GoodsRepo(this)
-    val testRepo = new TestCrudCrudRepo(this)
+    val testRepo = new TestCrudRepo(this)
 
     val drop = {
       val dropSeq = DBIO.seq(

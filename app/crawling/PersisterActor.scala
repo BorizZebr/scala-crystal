@@ -57,13 +57,13 @@ class PersisterActor @Inject()(
 
     case UpdateAmount(cmpId, am, date) =>
       chartsRepo.getByCompetitorAndDate(cmpId, date).map {
-        case None =>
-          val chart = Chart(None, Some(cmpId), am, LocalDate.now)
-          chartsRepo.insert(chart)
-
         case Some(x) =>
           val chart = x.updateAmount(am)
           chartsRepo.update(chart)
+
+        case None =>
+          val chart = Chart(None, Some(cmpId), am, LocalDate.now)
+          chartsRepo.insert(chart)
       }
       self ! PoisonPill
 

@@ -1,7 +1,7 @@
 package scala.crawling
 
 import akka.actor.{ActorSystem, Props}
-import akka.testkit.{ImplicitSender, TestKit, TestProbe}
+import akka.testkit.{TestKit, TestProbe}
 import crawling.CrawlMasterActor.CrawlAllCompetitors
 import crawling.CrawlerActor
 import crawling.CrawlerActor.CrawlCompetitor
@@ -20,16 +20,13 @@ class CrawlMasterActorSpec(_system: ActorSystem) extends TestKit(_system)
     with FlatSpecLike
     with Matchers
     with MockitoSugar
-    with BeforeAndAfterAll
-    with ImplicitSender {
+    with BeforeAndAfterAll {
 
   import crawling.CrawlMasterActor
-
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def this() = this(ActorSystem("CrawlMasterActorSpec"))
 
-  val factoryMock = mock[CrawlerActor.Factory]
   val competitorsRepoMock = mock[CompetitorsDao]
 
   override def afterAll: Unit = system.terminate()
@@ -38,7 +35,10 @@ class CrawlMasterActorSpec(_system: ActorSystem) extends TestKit(_system)
     // Arrange
     val t = TestProbe()
     when(competitorsRepoMock.getAll) thenReturn Future(Nil)
-    val actor = system.actorOf(Props(classOf[CrawlMasterActor], factoryMock, competitorsRepoMock))
+    val actor = system.actorOf(
+      Props(classOf[CrawlMasterActor],
+        new FakeActorFactory(t.ref) with CrawlerActor.Factory,
+        competitorsRepoMock))
 
     // Act
     actor ! CrawlAllCompetitors

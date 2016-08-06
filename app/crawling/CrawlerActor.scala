@@ -1,10 +1,9 @@
 package crawling
 
-import javax.inject.{Inject, Named}
+import javax.inject.Inject
 
 import akka.actor._
 import akka.stream.Materializer
-import com.google.inject.assistedinject.Assisted
 import crawling.GoodsAnalizerActor.{AnalizeGoods, AnalizeGoodsComplete}
 import crawling.PersisterActor.{UpdateAmount, UpdateGoods, UpdateReviews}
 import models.Competitor
@@ -60,12 +59,9 @@ class CrawlerActor @Inject()(
   override def receive: Receive = {
     case CrawlCompetitor(c) =>
 
-      val mainFuture = httpClient.url(s"${c.url}/?sortitems=4&v=0").get()
-      val firstReviewsFuture = httpClient.url(s"${c.url}/feedbacks").get()
-
       for {
-        main <- mainFuture
-        firstReviews <- firstReviewsFuture
+        main <- httpClient.url(s"${c.url}/?sortitems=4&v=0").get()
+        firstReviews <- httpClient.url(s"${c.url}/feedbacks").get()
         goods <- getPages(main, c.crawledGoodsPages, c.url, "?sortitems=0&v=0&from=")
         reviews <- getPages(firstReviews, c.crawledReviewsPages, c.url, "/feedbacks?status=m&from=")
       } yield {
@@ -90,18 +86,23 @@ class CrawlerActor @Inject()(
 
         // analize subscribers
         val subscribersAmount = Jsoup.parse(main.bodyAsUTF8).select("#totalSubscribers").text.toInt
-        persisterActor ! UpdateAmount(c.id.get, subscribersAmount, LocalDate.now)
+        getPersisterActor ! UpdateAmount(c.id.get, subscribersAmount, LocalDate.now)
       }
 
     case AnalizeReviewsComplete(cmp, reviews) =>
-      persisterActor ! UpdateReviews(reviews)
+      getPersisterActor ! UpdateReviews(reviews)
       waitingForReviews -= sender
       sendCompleteIfReady()
 
     case AnalizeGoodsComplete(cmp, goods) =>
-      persisterActor ! UpdateGoods(goods)
+      getPersisterActor ! UpdateGoods(goods)
       waitingForGoods -= sender
       sendCompleteIfReady()
+  }
+
+  private def getPersisterActor: ActorRef = {
+    val name = s"persister-${System.nanoTime}"
+    injectedChild(persisterFactory(), name)
   }
 
   private def sendCompleteIfReady(): Unit =

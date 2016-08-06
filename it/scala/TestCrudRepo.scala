@@ -8,7 +8,7 @@ import scala.concurrent.Future
 /**
   * Created by borisbondarenko on 26.05.16.
   */
-class TestCrudCrudRepo (dalConfig: DalConfig)
+class TestCrudRepo (dalConfig: DalConfig)
   extends RepoBase(dalConfig)
     with TestCrudDao {
 }

@@ -13,9 +13,40 @@
                 </div>
 
                 <p class="lead">Калькулятор цен доставки</p>
-                <form class="packages-calculator">
+                <div class="packages-calculator">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button
+                                type="button"
+                                class="btn btn-default dropdown-toggle"
+                                data-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"><span id="selectedPost">Почта</span> <span class="caret"></span>
+                            </button>
+                            <ul id="priceModels" class="dropdown-menu">
+                            </ul>
+                        </div>
 
-                </form>
+                        <input id="weightInput" type="text" class="form-control" placeholder="Вес...">
+                        <div class="input-group-btn">
+                            <button id="bGetPrice" class="btn btn-success">Go!</button>
+                        </div>
+                    </div>
+
+                    <div id="priceResult" class="hidden">
+                        <table class="table table-bordered table-condensed">
+                            <tr class="success">
+                                <td><span>Цена по модели:</span></td>
+                                <td><span id="priceByModel"></span></td>
+                            </tr>
+                            <tr class="info">
+                                <td><span>Цена почты:</span></td>
+                                <td><span id="priceByPost"></span></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
             </div>
 
             <div class="col-md-9 col-sm-12">
@@ -103,6 +134,35 @@
                     cmdtrs.get(0).click();
             });
 
+            // load price models
+            $.get("pricemodels",
+                function(data){
+                    var container = $("#priceModels");
+                    data.forEach(function(entry) {
+                        container.append("<li><a href='#' class='price-model'>" + entry + "</a></li>");
+                    });
+
+                    var prceModels = $(".price-model");
+                    prceModels.click(function() {
+                        $("#selectedPost").text($(this).text());
+                    });
+
+                    prceModels.get(0).click();
+                });
+
+            // get price
+            $("#bGetPrice").click(function() {
+                var weight = $("#weightInput").val();
+                var model = $("#selectedPost").text();
+
+                $.get("/price/" + model + "/" + weight, function(data){
+                    $("#priceByModel").text(Math.round(data.priceByCalc * 100) / 100);
+                    $("#priceByPost").text(Math.round(data.priceByPost * 100) / 100);
+
+                    $("#priceResult").removeClass("hidden");
+                });
+            });
+
             // load reviews button
             $("#bLoadReviews").click(function(){
                 var rCount = $("#reviews").find("> div").children().length;
@@ -143,12 +203,13 @@
                 $.get("goods/" + id, {skip: skip, take: take},
                         function(gds){
                             gds.forEach(function(g){
-                                var str = "<div class='col-sm-3 col-lg-3 col-md-3 animated fadeIn goods'>" +
+                                var str = "<div class='col-sm-6 col-lg-3 col-md-4 animated fadeIn goods'>" +
                                         "<div class='thumbnail'>" +
                                         "<a href='" + g.url + "' target='_blank'><img src='" + g.imgUrl + "' alt=''></a>" +
                                         "<div class='caption'>" +
                                         "<h5 class='pull-right'>\u20bd" + parseFloat(Math.round(g.price * 100) / 100).toFixed(2) + "</h5>" +
                                         "<h5><a href='" + g.url + "' target='_blank'>" + g.name + "</a></h5></div></div></div>";
+
                                 container.append(str);
                             });
                         });

@@ -32,7 +32,7 @@ class CompetitorsBootstraperActor @Inject()(
         val cmpName = co.unwrapped()("name").toString
         val cmpUrl = co.unwrapped()("url").toString
 
-        val name = s"persister-$name-${System.nanoTime}"
+        val name = s"persister-${System.nanoTime}"
         val persisterActor = injectedChild(persisterFactory(), name)
         persisterActor ! UpdateCompetitor(cmpUrl, cmpName)
       }
