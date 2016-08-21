@@ -1,6 +1,5 @@
-package scala
+package scala.dal
 
-import dal.{DalMatchers, DalSpec}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FunSpec, MustMatchers}
 

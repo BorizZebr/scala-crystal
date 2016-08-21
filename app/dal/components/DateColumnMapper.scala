@@ -3,8 +3,6 @@ package dal.components
 import java.sql.Timestamp
 
 import org.joda.time.{DateTime, LocalDate}
-import play.api.db.slick.HasDatabaseConfig
-import slick.driver.JdbcProfile
 
 /**
   * Created by borisbondarenko on 25.05.16.

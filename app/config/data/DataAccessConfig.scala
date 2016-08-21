@@ -1,4 +1,4 @@
-package config
+package config.data
 
 import javax.inject.{Inject, Singleton}
 

@@ -1,11 +1,16 @@
-package bootstrap.init
+package bootstrap.fakeinit
 
 import javax.inject.Inject
 
 import com.google.inject.AbstractModule
 import dal.repos._
-import models.{Chart, Competitor, Good, Review}
+import models._
 import org.joda.time.LocalDate
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Try
 
 /**
   * Created by borisbondarenko on 25.05.16.
@@ -16,30 +21,32 @@ class InitDevDatabaseModule extends AbstractModule {
     bind(classOf[InitDevDatabase]).asEagerSingleton()
 }
 
-private[init] class InitDevDatabase @Inject()
+private[fakeinit] class InitDevDatabase @Inject()
 (
   competitorsRepo: CompetitorsDao,
   reviewsRepo: ReviewsDao,
   goodsRepo: GoodsDao,
-  chartsRepo: ChartsDao) {
+  chartsRepo: ChartsDao,
+  resRepo: RespTemplatesDao) {
 
   def insert(): Unit = {
 
-//    val insertInitialDataFuture = for {
-//      count <- competitorsRepo.count() if count == 0
-//      _ <- competitorsRepo.insert(InitDevDatabase.competitors)
-//      _ <- reviewsRepo.insert(InitDevDatabase.reviews)
-//      _ <- goodsRepo.insert(InitDevDatabase.goods)
-//      _ <- chartsRepo.insert(InitDevDatabase.charts)
-//    } yield ()
-//
-//    Try(Await.result(insertInitialDataFuture, Duration.Inf))
+    val insertInitialDataFuture = for {
+      count <- competitorsRepo.count if count == 0
+      _ <- competitorsRepo.insert(InitDevDatabase.competitors)
+      _ <- reviewsRepo.insert(InitDevDatabase.reviews)
+      _ <- goodsRepo.insert(InitDevDatabase.goods)
+      _ <- chartsRepo.insert(InitDevDatabase.charts)
+      _ <- resRepo.insert(InitDevDatabase.resTemplates)
+    } yield ()
+
+    Try(Await.result(insertInitialDataFuture, Duration.Inf))
   }
 
   insert()
 }
 
-private[init] object InitDevDatabase {
+private[fakeinit] object InitDevDatabase {
 
   import scala.util.Random
 
@@ -69,8 +76,7 @@ private[init] object InitDevDatabase {
   val competitors = Seq(
     Competitor(Some(1), "Страна Повторяндия", "http://www.livemaster.ru/3165", None, None, 0, 0),
     Competitor(Some(2), "Кристаль Систаль", "http://www.livemaster.ru/etnoart", None, None, 0, 0),
-    Competitor(Some(3), "Обыкновенные Обыкновенности", "http://www.livemaster.ru/embroidery", None, None, 0, 0)
-  )
+    Competitor(Some(3), "Обыкновенные Обыкновенности", "http://www.livemaster.ru/embroidery", None, None, 0, 0))
 
   val reviews = for {
     c <- competitors
@@ -78,7 +84,7 @@ private[init] object InitDevDatabase {
       Review(
         None,
         c.id,
-        author = LoremIpsum.words(2).split(' ').map(_ capitalize).mkString(" "),
+        author = LoremIpsum.words(2).split(' ').map(_.capitalize).mkString(" "),
         text = LoremIpsum.paragraphs(1),
         LocalDate.now.minusDays(rnd.nextInt(30)))
     }
@@ -109,4 +115,9 @@ private[init] object InitDevDatabase {
         LocalDate.now.minusDays(x))
     }
   } yield p
+
+  val resTemplates = Seq(
+    ResponseTemplate(Some(1), "Нейтральный", LoremIpsum.paragraph),
+    ResponseTemplate(Some(2), "Второй", LoremIpsum.paragraph),
+    ResponseTemplate(Some(3), "Синий", LoremIpsum.paragraph))
 }

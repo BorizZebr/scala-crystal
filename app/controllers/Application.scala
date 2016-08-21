@@ -12,7 +12,8 @@ class Application @Inject()
   competitorsRepo: CompetitorsDao,
   reviewsRepo: ReviewsDao,
   goodsRepo: GoodsDao,
-  chartsRepo: ChartsDao) extends Controller {
+  chartsRepo: ChartsDao,
+  respTemplatesRepo: RespTemplatesDao) extends Controller {
 
   /**
     * Index page controller
@@ -35,9 +36,8 @@ class Application @Inject()
     * @return All competitors registered in system
     */
   def competitor = Action.async {
-    val competitors = competitorsRepo.getAll
-    competitors.map{
-      cs => Ok(Json.toJson(cs))
+    competitorsRepo.getAll.map { cs =>
+      Ok(Json.toJson(cs))
     }
   }
 
@@ -49,9 +49,8 @@ class Application @Inject()
     * @return Reviews for competitor
     */
   def review(id: Long, skip: Int, take: Int) = Action.async {
-    val reviews = reviewsRepo.getByCompetitor(id, skip, take)
-    reviews.map {
-      rv => Ok(Json.toJson(rv))
+    reviewsRepo.getByCompetitor(id, skip, take).map { rv =>
+      Ok(Json.toJson(rv))
     }
   }
 
@@ -63,9 +62,8 @@ class Application @Inject()
     * @return Goods for competitor
     */
   def goods(id: Long, skip: Int, take: Int) = Action.async {
-    val goods = goodsRepo.getByCompetitor(id, skip, take)
-    goods.map {
-      gd => Ok(Json.toJson(gd))
+    goodsRepo.getByCompetitor(id, skip, take).map { gd =>
+      Ok(Json.toJson(gd))
     }
   }
 
@@ -75,9 +73,8 @@ class Application @Inject()
     * @return Chart for passed 30 days
     */
   def chart(id: Long) = Action.async {
-    val points = chartsRepo.getPoints(id, 0, 30)
-    points.map {
-      pt => Ok(Json.toJson(pt))
+    chartsRepo.getPoints(id, 0, 30).map { pt =>
+      Ok(Json.toJson(pt))
     }
   }
 }

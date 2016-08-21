@@ -1,4 +1,4 @@
-package dal
+package scala.dal
 
 import dal.repos.CompetitorsDao
 import models.Competitor
@@ -18,8 +18,6 @@ class CompetitorsDaoSpec extends FunSpec
     with MustMatchers
     with ScalaFutures
     with BeforeAndAfterEach {
-
-  import driver.api._
 
   val testCompetitors = Map[Int, Competitor](
     1 -> Competitor(Option(1), "Test-1", "Url-1"),

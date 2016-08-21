@@ -17,4 +17,7 @@ package object controllers {
 
   implicit val priceInfoWrite = Json.writes[PriceResponse]
   implicit val priceInfoReads = Json.reads[PriceResponse]
+
+  implicit val responseTemplateWrites = Json.writes[ResponseTemplate]
+  implicit val responseTemplateReads = Json.reads[ResponseTemplate]
 }

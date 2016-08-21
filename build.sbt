@@ -2,9 +2,11 @@ name := "scalaplayground"
 
 version := "1.0"
 
+val Demo = config("demo") extend Runtime
+
 lazy val `scalaplayground` = (project in file("."))
   .enablePlugins(PlayScala)
-  .configs(IntegrationTest)
+  .configs(IntegrationTest, Demo)
   .settings(Defaults.itSettings: _*)
 
 scalaVersion := "2.11.8"
@@ -33,6 +35,7 @@ unmanagedSourceDirectories in IntegrationTest <<=
   (baseDirectory in IntegrationTest)(base =>  Seq(base / "it"))
 
 javaOptions in Test += "-Dconfig.file=conf/application.test.conf"
+javaOptions in Demo += "-Dconfig.file=conf/application.demo.conf"
 
 parallelExecution in IntegrationTest := false
 

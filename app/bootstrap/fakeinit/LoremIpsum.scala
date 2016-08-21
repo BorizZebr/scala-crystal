@@ -1,4 +1,4 @@
-package bootstrap.init
+package bootstrap.fakeinit
 
 import scala.util.Random
 

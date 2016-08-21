@@ -1,4 +1,4 @@
-package bootstrap.guice
+package config.guice
 
 import com.google.inject.AbstractModule
 import crawling._
@@ -16,6 +16,7 @@ class GuiceModule extends AbstractModule with AkkaGuiceSupport {
     bind(classOf[ChartsDao]).to(classOf[ChartsRepo])
     bind(classOf[ReviewsDao]).to(classOf[ReviewsRepo])
     bind(classOf[GoodsDao]).to(classOf[GoodsRepo])
+    bind(classOf[RespTemplatesDao]).to(classOf[RespTemplatesRepo])
 
     bindActor[CrawlMasterActor]("crawl-master")
     bindActor[CompetitorsBootstraperActor]("cmpttr-btstrpr")
@@ -29,6 +30,7 @@ class GuiceModule extends AbstractModule with AkkaGuiceSupport {
 class DevModule extends GuiceModule {
   override def configure() = {
     super.configure()
+    // fake price calculator service
     bind(classOf[PriceCalculatorService]).toInstance(FakePriceCalculator)
   }
 }
@@ -36,6 +38,7 @@ class DevModule extends GuiceModule {
 class ProdModule extends GuiceModule {
   override def configure() = {
     super.configure()
+    // real price calculator service
     bind(classOf[PriceCalculatorService]).to(classOf[ProdPriceCalculator])
   }
 }

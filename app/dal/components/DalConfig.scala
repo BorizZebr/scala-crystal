@@ -1,7 +1,7 @@
 package dal.components
 
 import com.google.inject.ImplementedBy
-import config.DataAccessConfig
+import config.data.DataAccessConfig
 import slick.driver.JdbcProfile
 
 /**

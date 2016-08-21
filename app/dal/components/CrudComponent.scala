@@ -34,5 +34,8 @@ trait CrudComponent extends TypedComponent { self: DalConfig =>
   def update(entity: Entity): Future[Unit] =
     db.run(table.insertOrUpdate(entity)).map(_ => ())
 
+  def delete(id: Long): Future[Unit] =
+    db.run(table.filter(_.id === id).delete).map(_ => ())
+
   def contains(entity: Entity): Future[Boolean]
 }

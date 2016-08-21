@@ -51,6 +51,11 @@ case class Chart(
     this.id, this.competitorId, amount, this.date)
 }
 
+case class ResponseTemplate(
+  id: Option[Long],
+  name: String,
+  text: String)
+
 case class ChartPoint(x: LocalDate, amount: Int, change: Int)
 
 case class Pckg(weight: Double)

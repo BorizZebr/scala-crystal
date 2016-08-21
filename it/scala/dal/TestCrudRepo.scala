@@ -1,4 +1,4 @@
-package scala
+package scala.dal
 
 import dal.components.{CrudComponent, DalConfig}
 import dal.repos.RepoBase
