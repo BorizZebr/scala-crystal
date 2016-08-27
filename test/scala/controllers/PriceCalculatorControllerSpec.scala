@@ -1,4 +1,4 @@
-package scala.play
+package scala.controllers
 
 import controllers._
 import models.{Pckg, PriceResponse}

@@ -3,7 +3,7 @@ package controllers
 import javax.inject.Inject
 
 import dal.repos._
-import models.ResponseTemplate
+import models.{IdResult, ResponseTemplate}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 
@@ -41,8 +41,8 @@ class ResponseTemplates @Inject()
     val json = request.body.asJson.get
     val resTemp = json.as[ResponseTemplate]
 
-    respTemplatesRepo.insert(resTemp).map { _ =>
-      Ok
+    respTemplatesRepo.insert(resTemp).map { res =>
+      Ok(Json.toJson(IdResult(res)))
     }
   }
 

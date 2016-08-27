@@ -12,8 +12,7 @@ class Application @Inject()
   competitorsRepo: CompetitorsDao,
   reviewsRepo: ReviewsDao,
   goodsRepo: GoodsDao,
-  chartsRepo: ChartsDao,
-  respTemplatesRepo: RespTemplatesDao) extends Controller {
+  chartsRepo: ChartsDao) extends Controller {
 
   /**
     * Index page controller

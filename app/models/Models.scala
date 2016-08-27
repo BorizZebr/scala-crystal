@@ -56,6 +56,8 @@ case class ResponseTemplate(
   name: String,
   text: String)
 
+case class IdResult(id: Long)
+
 case class ChartPoint(x: LocalDate, amount: Int, change: Int)
 
 case class Pckg(weight: Double)

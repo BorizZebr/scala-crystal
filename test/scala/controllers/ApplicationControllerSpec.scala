@@ -1,4 +1,4 @@
-package scala.play
+package scala.controllers
 
 import dal.repos.{ChartsDao, CompetitorsDao, GoodsDao, ReviewsDao}
 import models._

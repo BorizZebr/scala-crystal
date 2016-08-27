@@ -20,4 +20,6 @@ package object controllers {
 
   implicit val responseTemplateWrites = Json.writes[ResponseTemplate]
   implicit val responseTemplateReads = Json.reads[ResponseTemplate]
+
+  implicit val idResultWrites = Json.writes[IdResult]
 }

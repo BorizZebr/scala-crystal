@@ -2,87 +2,84 @@
 
 @main("Competitors") {
 
-    <!-- Page Content -->
-    <div class="container">
 
-        <div class="row">
+    <div class="row">
 
-            <div class="col-md-3">
-                <p class="lead">Конкуренты</p>
-                <div id="competitors" class="list-group">
+        <div class="col-md-3">
+            <p class="lead">Конкуренты</p>
+            <div id="competitors" class="list-group">
+            </div>
+
+            <p class="lead">Калькулятор цен доставки</p>
+            <div class="packages-calculator">
+                <div class="input-group">
+                    <div class="input-group-btn">
+                        <button
+                            type="button"
+                            class="btn btn-default dropdown-toggle"
+                            data-toggle="dropdown"
+                            aria-haspopup="true"
+                            aria-expanded="false"><span id="selectedPost">Почта</span> <span class="caret"></span>
+                        </button>
+                        <ul id="priceModels" class="dropdown-menu">
+                        </ul>
+                    </div>
+
+                    <input id="weightInput" type="text" class="form-control" placeholder="Вес...">
+                    <div class="input-group-btn">
+                        <button id="bGetPrice" class="btn btn-success">Go!</button>
+                    </div>
                 </div>
 
-                <p class="lead">Калькулятор цен доставки</p>
-                <div class="packages-calculator">
-                    <div class="input-group">
-                        <div class="input-group-btn">
-                            <button
-                                type="button"
-                                class="btn btn-default dropdown-toggle"
-                                data-toggle="dropdown"
-                                aria-haspopup="true"
-                                aria-expanded="false"><span id="selectedPost">Почта</span> <span class="caret"></span>
-                            </button>
-                            <ul id="priceModels" class="dropdown-menu">
-                            </ul>
-                        </div>
+                <div id="priceResult" class="hidden">
+                    <table class="table table-bordered table-condensed">
+                        <tr class="success">
+                            <td><span>Цена по модели:</span></td>
+                            <td><span id="priceByModel"></span></td>
+                        </tr>
+                        <tr class="info">
+                            <td><span>Цена почты:</span></td>
+                            <td><span id="priceByPost"></span></td>
+                        </tr>
+                    </table>
+                </div>
 
-                        <input id="weightInput" type="text" class="form-control" placeholder="Вес...">
-                        <div class="input-group-btn">
-                            <button id="bGetPrice" class="btn btn-success">Go!</button>
-                        </div>
-                    </div>
+            </div>
+        </div>
 
-                    <div id="priceResult" class="hidden">
-                        <table class="table table-bordered table-condensed">
-                            <tr class="success">
-                                <td><span>Цена по модели:</span></td>
-                                <td><span id="priceByModel"></span></td>
-                            </tr>
-                            <tr class="info">
-                                <td><span>Цена почты:</span></td>
-                                <td><span id="priceByPost"></span></td>
-                            </tr>
-                        </table>
-                    </div>
+        <div class="col-md-9 col-sm-12">
 
+            <h4>Подписчики</h4>
+
+            <div class="thumbnail">
+                <div id="chart">
                 </div>
             </div>
 
-            <div class="col-md-9 col-sm-12">
+            <h4>Отзывы</h4>
 
-                <h4>Подписчики</h4>
-
-                <div class="thumbnail">
-                    <div id="chart">
-                    </div>
+            <div class="well">
+                <div id="reviews">
                 </div>
 
-                <h4>Отзывы</h4>
-
-                <div class="well">
-                    <div id="reviews">
-                    </div>
-
-                    <div class="text-center">
-                        <div id="bLoadReviews" class="btn btn-success">Загрузить ещё</div>
-                    </div>
+                <div class="text-center">
+                    <div id="bLoadReviews" class="btn btn-success">Загрузить ещё</div>
                 </div>
+            </div>
 
-                <h4>Товары</h4>
+            <h4>Товары</h4>
 
-                <div id="goods" class="row">
-                </div>
+            <div id="goods" class="row">
+            </div>
 
-                <div class="row">
-                    <div class="text-center">
-                        <div id="bLoadGoods" class="btn btn-success">Загрузить ещё</div>
-                    </div>
+            <div class="row">
+                <div class="text-center">
+                    <div id="bLoadGoods" class="btn btn-success">Загрузить ещё</div>
                 </div>
             </div>
         </div>
     </div>
-        <!-- /.container -->
+
 
     <script type="text/javascript">
         $(document).ready(function(){
@@ -100,7 +97,7 @@
                     var cmdtrs = $(".cmpdtr");
 
                     cmdtrs.click(function(){
-                        $(".cmpdtr").each(function(){
+                        cmdtrs.each(function(){
                             $(this).removeClass('active');
                         });
                         $(this).addClass('active');

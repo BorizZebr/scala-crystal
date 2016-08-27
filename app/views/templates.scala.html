@@ -1,10 +1,96 @@
 @()
 
-@main("Temp@lates") {
+@main("Templates") {
 
-  <!-- Page Content -->
-  <div class="container">
-    There gonna be templates
-  </div>
-    <!-- /.container -->
+    <div class="row">
+        <div id="restemplates">
+        </div>
+
+        <div class='col-sm-6 col-lg-4 col-md-4 animated fadeIn'>
+            <button id="addNew" class="btn btn-danger">Добавить</button>
+            <label for="newName">Имя шаблона</label>
+            <input type="text" id="newName" size="22"/>
+            <p></p>
+            <textarea id='txtx_new' class='restem-text-new' cols='50' rows='10' title='Текст'>
+            </textarea>
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            function refresh() {
+                $.get("responsetemplates",
+                    function (data) {
+                        var container = $("#restemplates");
+                        container.empty();
+
+                        data.forEach(function (entry) {
+                            var str = "<div class='col-sm-6 col-lg-4 col-md-4 animated fadeIn rstmpltprnt' restem-id='" + entry.id + "'>" +
+                                    "<button class='btn btn-success copy-btn' data-clipboard-target='txtx_" + entry.id + "'>" + entry.name + "</button> " +
+                                    "<p></p>" +
+                                    "<textarea id='txtx_" + entry.id + "' class='restem-text' cols='50' rows='10' title='Текст'>" + entry.text +
+                                    "</textarea></div>";
+                            container.append(str);
+                        });
+
+                        var copyBtns = $(".copy-btn");
+                        $.each(copyBtns, function (key, entry) {
+                            var client = new ZeroClipboard(entry);
+                            client.on("ready", function () {
+                                client.on("aftercopy", function() {
+                                    $(entry).notify("Скопировано", {
+                                        autoHideDelay: 1000,
+                                        className: "success"
+                                    });
+                                });
+                            });
+                        });
+
+                        var txts = $(".restem-text");
+                        $.each(txts, function (key, entry) {
+                            var el = $(entry);
+                            el.change(function () {
+                                var id = el.parents(".rstmpltprnt").attr("restem-id");
+                                var name = el.siblings(".copy-btn").text();
+                                var text = el.val();
+
+                                $.ajax({
+                                    url: 'responsetemplates',
+                                    type: 'PUT',
+                                    contentType: "application/json; charset=utf-8",
+                                    data: JSON.stringify({
+                                        id: parseInt(id),
+                                        name: name,
+                                        text: text
+                                    })
+                                });
+                            });
+                        });
+                    });
+            }
+
+            $("#addNew").click(function(){
+                var name = $("#newName").val();
+                var text = $("#txtx_new").val();
+                $.ajax({
+                    url: 'responsetemplates',
+                    type: 'POST',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({
+                        name: name,
+                        text: text
+                    })
+                })
+                .done(function() {
+                    $("#newName").val("");
+                    $("#txtx_new").val("");
+                    refresh();
+                });
+            });
+
+            refresh();
+        });
+    </script>
 }

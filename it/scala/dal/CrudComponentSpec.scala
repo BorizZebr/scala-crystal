@@ -23,18 +23,20 @@ class CrudComponentSpec extends FunSpec
       result(count) mustEqual 0
     }
 
-    it("should be able to put new entity") {
-      whenReady(insert(TestEntity(None, "testtesttest"))) { _ =>
+    it("should be able to put new entity and return id") {
+      whenReady(insert(TestEntity(None, "testtesttest"))) { res =>
+        res mustBe 1
         result(db.run(sql"""SELECT COUNT(*) FROM #$tableName""".as[Int])).head mustEqual 1
       }
     }
 
-    it("should be able to put collection of new entities") {
+    it("should be able to put collection of new entities and return their ids") {
       val seq = Seq(
         TestEntity(None, "test-1"),
         TestEntity(None, "test-2"),
         TestEntity(None, "test-3"))
-      whenReady(insert(seq)) { _ =>
+      whenReady(insert(seq)) { res =>
+        res mustBe Seq(1, 2, 3)
         result(db.run(sql"""SELECT COUNT(*) FROM #$tableName""".as[Int])).head mustEqual 3
       }
     }

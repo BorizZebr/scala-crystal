@@ -1,17 +1,12 @@
-package scala.play
+package scala.routing
 
 import controllers._
-import models.Pckg
+import models.{Pckg, ResponseTemplate}
 import org.scalatestplus.play._
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test._
 
-/**
- * Add your spec here.
- * You can mock out a whole application including requests, plugins etc.
- * For more information, consult the wiki.
- */
 class RoutingSpec extends PlaySpec
   with OneAppPerSuite {
 
@@ -28,8 +23,21 @@ class RoutingSpec extends PlaySpec
 
       status(home) mustBe OK
       contentType(home) mustBe Some("text/html")
-      contentAsString(home) must include ("Очень злая система")
-      contentAsString(home) must include ("Корпорация Зла")
+      contentAsString(home) must {
+        include ("Очень злая система") and
+        include ("Корпорация Зла")
+      }
+    }
+
+    "render templates page" in {
+      val Some(tmplts) = route(app, FakeRequest(GET, "/templates"))
+
+      status(tmplts) mustBe OK
+      contentType(tmplts) mustBe Some("text/html")
+      contentAsString(tmplts) must {
+        include ("Дубовики") and
+        include ("Добавить")
+      }
     }
 
     "return competitors JSON" in {
@@ -87,7 +95,7 @@ class RoutingSpec extends PlaySpec
       status(price) mustBe BAD_REQUEST
     }
 
-    "store new package" in {
+    "store new package POST" in {
       val Some(pckg) = route(app,
         FakeRequest(
           POST,
@@ -97,6 +105,54 @@ class RoutingSpec extends PlaySpec
 
       status(pckg) mustBe OK
       contentType(pckg) mustBe None
+    }
+
+    "return response templates JSON" in {
+      val Some(tmplts) = route(app,
+        FakeRequest(GET, "/responsetemplates"))
+
+      status(tmplts) mustBe OK
+      contentType(tmplts) mustBe Some("application/json")
+    }
+
+    "store new template PUT" in {
+      val Some(tmplt) = route(app,
+        FakeRequest(
+          POST,
+          "/responsetemplates",
+          FakeHeaders(),
+          Json.toJson(ResponseTemplate(
+            Some(100500),
+            "name",
+            "text"))))
+
+      status(tmplt) mustBe OK
+      contentType(tmplt) mustBe Some("application/json")
+    }
+
+    "update template POST" in {
+      val Some(tmplt) = route(app,
+        FakeRequest(
+          PUT,
+          "/responsetemplates",
+          FakeHeaders(),
+          Json.toJson(ResponseTemplate(
+            None,
+            "name",
+            "text"))))
+
+      status(tmplt) mustBe OK
+      contentType(tmplt) mustBe None
+    }
+
+    "delete template DELETE" in {
+      val Some(tmplt) = route(app,
+        FakeRequest(
+          DELETE,
+          "/responsetemplates/100500"))
+
+      status(tmplt) mustBe OK
+      contentType(tmplt) mustBe None
     }
   }
 }

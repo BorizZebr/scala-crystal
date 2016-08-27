@@ -25,11 +25,11 @@ trait CrudComponent extends TypedComponent { self: DalConfig =>
   def count: Future[Int] =
     db.run(table.map(_.id).length.result)
 
-  def insert(entity: Entity): Future[Unit] =
-    db.run(table += entity).map(_ => ())
+  def insert(entity: Entity): Future[Long] =
+    db.run((table returning table.map(_.id)) += entity)
 
-  def insert(entities: Seq[Entity]): Future[Unit] =
-    db.run(table ++= entities).map(_ => ())
+  def insert(entities: Seq[Entity]): Future[Seq[Long]] =
+    db.run((table returning table.map(_.id)) ++= entities)
 
   def update(entity: Entity): Future[Unit] =
     db.run(table.insertOrUpdate(entity)).map(_ => ())
