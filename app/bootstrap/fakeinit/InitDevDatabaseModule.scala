@@ -3,14 +3,15 @@ package bootstrap.fakeinit
 import javax.inject.Inject
 
 import com.google.inject.AbstractModule
-import dal.repos._
-import models._
+import com.zebrosoft.crystal.dal.repos._
+import com.zebrosoft.crystal.model._
 import org.joda.time.LocalDate
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by borisbondarenko on 25.05.16.

@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import models.Pckg
+import com.zebrosoft.crystal.model.Pckg
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}

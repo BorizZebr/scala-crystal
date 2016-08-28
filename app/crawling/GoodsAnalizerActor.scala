@@ -1,7 +1,7 @@
 package crawling
 
 import akka.actor.{Actor, PoisonPill, Props}
-import models.Good
+import com.zebrosoft.crystal.model.Good
 import org.joda.time.LocalDate
 import org.jsoup.Jsoup
 import play.api.libs.ws.WSResponse

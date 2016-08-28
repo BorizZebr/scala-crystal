@@ -1,7 +1,7 @@
 package scala.routing
 
 import controllers._
-import models.{Pckg, ResponseTemplate}
+import com.zebrosoft.crystal.model.{Pckg, ResponseTemplate}
 import org.scalatestplus.play._
 import play.api.libs.json.Json
 import play.api.test.Helpers._

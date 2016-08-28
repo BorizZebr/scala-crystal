@@ -4,9 +4,9 @@ import javax.inject.Inject
 
 import akka.actor._
 import akka.stream.Materializer
+import com.zebrosoft.crystal.model.Competitor
 import crawling.GoodsAnalizerActor.{AnalizeGoods, AnalizeGoodsComplete}
 import crawling.PersisterActor.{UpdateAmount, UpdateGoods, UpdateReviews}
-import models.Competitor
 import org.joda.time.LocalDate
 import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport

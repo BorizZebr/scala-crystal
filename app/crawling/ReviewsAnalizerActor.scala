@@ -1,11 +1,11 @@
 package crawling
 
 import akka.actor.{Actor, PoisonPill, Props}
-import models.{Competitor, Review}
-import org.joda.time.{DateTime, LocalDate}
+import com.zebrosoft.crystal.model.Review
+import org.joda.time.LocalDate
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
-import play.api.libs.ws.WSResponse
 import org.jsoup.Jsoup
+import play.api.libs.ws.WSResponse
 
 /**
   * Created by borisbondarenko on 18.06.16.
@@ -25,6 +25,7 @@ object ReviewsAnalizerActor {
 class ReviewsAnalizerActor extends Actor {
 
   import ReviewsAnalizerActor._
+
   import scala.collection.JavaConversions._
 
   val formatter: DateTimeFormatter = DateTimeFormat.forPattern("dd.MM.yyyy")

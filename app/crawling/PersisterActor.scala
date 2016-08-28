@@ -3,8 +3,8 @@ package crawling
 import javax.inject.Inject
 
 import akka.actor.{Actor, PoisonPill, Props}
-import dal.repos._
-import models._
+import com.zebrosoft.crystal.dal.repos.{ChartsDao, CompetitorsDao, GoodsDao, ReviewsDao}
+import com.zebrosoft.crystal.model.{Chart, Competitor, Good, Review}
 import org.joda.time.LocalDate
 import play.api.Logger
 

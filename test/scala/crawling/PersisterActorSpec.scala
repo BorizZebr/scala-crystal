@@ -2,9 +2,9 @@ package scala.crawling
 
 import akka.actor.{ActorSystem, Props}
 import akka.testkit.TestProbe
+import com.zebrosoft.crystal.dal.repos.{ChartsDao, CompetitorsDao, GoodsDao, ReviewsDao}
+import com.zebrosoft.crystal.model._
 import crawling.PersisterActor._
-import dal.repos.{ChartsDao, CompetitorsDao, GoodsDao, ReviewsDao}
-import models.{Chart, Competitor, Good, Review}
 import org.joda.time.LocalDate
 import org.mockito.Matchers.any
 import org.mockito.Mockito._

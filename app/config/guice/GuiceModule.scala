@@ -1,8 +1,10 @@
 package config.guice
 
 import com.google.inject.AbstractModule
+import com.zebrosoft.crystal.dal.components.DalConfig
+import com.zebrosoft.crystal.dal.repos._
+import config.data.DataAccessConfig
 import crawling._
-import dal.repos._
 import play.api.libs.concurrent.AkkaGuiceSupport
 import services._
 
@@ -12,11 +14,12 @@ import services._
 class GuiceModule extends AbstractModule with AkkaGuiceSupport {
   override def configure() = {
 
-    bind(classOf[CompetitorsDao]).to(classOf[CompetitorsRepo])
-    bind(classOf[ChartsDao]).to(classOf[ChartsRepo])
-    bind(classOf[ReviewsDao]).to(classOf[ReviewsRepo])
-    bind(classOf[GoodsDao]).to(classOf[GoodsRepo])
-    bind(classOf[RespTemplatesDao]).to(classOf[RespTemplatesRepo])
+    bind(classOf[DalConfig]).to(classOf[DataAccessConfig]).asEagerSingleton()
+    bind(classOf[CompetitorsDao]).to(classOf[CompetitorsRepo]).asEagerSingleton()
+    bind(classOf[ChartsDao]).to(classOf[ChartsRepo]).asEagerSingleton()
+    bind(classOf[ReviewsDao]).to(classOf[ReviewsRepo]).asEagerSingleton()
+    bind(classOf[GoodsDao]).to(classOf[GoodsRepo]).asEagerSingleton()
+    bind(classOf[RespTemplatesDao]).to(classOf[RespTemplatesRepo]).asEagerSingleton()
 
     bindActor[CrawlMasterActor]("crawl-master")
     bindActor[CompetitorsBootstraperActor]("cmpttr-btstrpr")

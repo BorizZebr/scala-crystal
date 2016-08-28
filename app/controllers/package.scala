@@ -1,4 +1,4 @@
-import models._
+import com.zebrosoft.crystal.model._
 import play.api.libs.json.{Json, Writes}
 
 /**

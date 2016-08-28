@@ -1,7 +1,7 @@
 package scala.controllers
 
+import com.zebrosoft.crystal.model.{Pckg, PriceResponse}
 import controllers._
-import models.{Pckg, PriceResponse}
 import org.mockito.Matchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar

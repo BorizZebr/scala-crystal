@@ -1,7 +1,7 @@
 package scala.controllers
 
-import dal.repos.{ChartsDao, CompetitorsDao, GoodsDao, ReviewsDao}
-import models._
+import com.zebrosoft.crystal.dal.repos.{ChartsDao, CompetitorsDao, GoodsDao, ReviewsDao}
+import com.zebrosoft.crystal.model.{ChartPoint, Competitor, Good, Review}
 import org.joda.time.LocalDate
 import org.mockito.Matchers.{eq => eqTo, _}
 import org.mockito.Mockito._

@@ -8,6 +8,6 @@ import play.api.libs.ws.WSResponse
 package object crawling {
 
   implicit class WSResponseImprovement(val response: WSResponse) {
-    def bodyAsUTF8: String = new String(response.bodyAsBytes toArray, StandardCharsets.UTF_8)
+    def bodyAsUTF8: String = new String(response.bodyAsBytes.toArray, StandardCharsets.UTF_8)
   }
 }

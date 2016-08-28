@@ -2,8 +2,8 @@ package crawling
 
 import javax.inject.Inject
 
-import akka.actor.{Actor, ActorRef, Props}
-import dal.repos._
+import akka.actor.{Actor, Props}
+import com.zebrosoft.crystal.dal.repos.CompetitorsDao
 import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 

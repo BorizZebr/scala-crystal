@@ -2,8 +2,8 @@ package controllers
 
 import javax.inject.Inject
 
-import dal.repos._
-import models.{IdResult, ResponseTemplate}
+import com.zebrosoft.crystal.dal.repos.RespTemplatesDao
+import com.zebrosoft.crystal.model.{IdResult, ResponseTemplate}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 

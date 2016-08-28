@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import dal.repos._
+import com.zebrosoft.crystal.dal.repos._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json._
 import play.api.mvc._

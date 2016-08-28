@@ -2,11 +2,11 @@ package scala.crawling
 
 import akka.actor.{ActorSystem, Props}
 import akka.testkit.{TestKit, TestProbe}
+import com.zebrosoft.crystal.dal.repos.CompetitorsDao
+import com.zebrosoft.crystal.model.Competitor
 import crawling.CrawlMasterActor.CrawlAllCompetitors
 import crawling.CrawlerActor
 import crawling.CrawlerActor.CrawlCompetitor
-import dal.repos.CompetitorsDao
-import models.Competitor
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
@@ -23,6 +23,7 @@ class CrawlMasterActorSpec(_system: ActorSystem) extends TestKit(_system)
     with BeforeAndAfterAll {
 
   import crawling.CrawlMasterActor
+
   import scala.concurrent.ExecutionContext.Implicits.global
 
   def this() = this(ActorSystem("CrawlMasterActorSpec"))

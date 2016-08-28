@@ -3,7 +3,7 @@ package services
 import javax.inject.Inject
 
 import akka.stream.Materializer
-import models.{Pckg, PriceResponse}
+import com.zebrosoft.crystal.model.{Pckg, PriceResponse}
 import play.api.Configuration
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
