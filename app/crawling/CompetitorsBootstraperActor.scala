@@ -3,7 +3,7 @@ package crawling
 import javax.inject.Inject
 
 import akka.actor.{Actor, Props}
-import crawling.PersisterActor.UpdateCompetitor
+import com.zebrosoft.crystal.dal.repos.CompetitorsDao
 import play.api.Configuration
 import play.api.libs.concurrent.InjectedActorSupport
 
@@ -17,7 +17,7 @@ object CompetitorsBootstraperActor {
 
 class CompetitorsBootstraperActor @Inject()(
     configuration: Configuration,
-    persisterFactory: PersisterActor.Factory) extends Actor
+    competitorsRepo: CompetitorsDao) extends Actor
     with InjectedActorSupport {
 
   import CompetitorsBootstraperActor._
@@ -29,12 +29,9 @@ class CompetitorsBootstraperActor @Inject()(
     case BootstrapCompetitors =>
       // read the conf
       configuration.underlying.getObjectList("competitors").foreach { co =>
-        val cmpName = co.unwrapped()("name").toString
         val cmpUrl = co.unwrapped()("url").toString
-
-        val name = s"persister-${System.nanoTime}"
-        val persisterActor = injectedChild(persisterFactory(), name)
-        persisterActor ! UpdateCompetitor(cmpUrl, cmpName)
+        val cmpName = co.unwrapped()("name").toString
+        competitorsRepo.updateName(cmpUrl, cmpName)
       }
   }
 

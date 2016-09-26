@@ -51,6 +51,9 @@ class CompetitorCrawler (
       goodsPages <- getPages(main, cmp.crawledGoodsPages, 40, cmp.url, "?sortitems=0&v=0&from=")
     } {
 
+      // need to filter review/goods pages by status -- in case not all of them are 200 --> fail!
+      // if everything is fine --> proceed and not forget to update competitor with parsed pages and start/finish date
+
       Logger.info(s"Goods Pages Count -- ${goodsPages.size}")
       Logger.info(s"Reviews Pages Count -- ${reviewsPages.size}")
 

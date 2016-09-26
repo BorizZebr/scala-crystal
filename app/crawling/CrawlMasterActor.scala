@@ -15,8 +15,6 @@ object CrawlMasterActor {
   def props = Props[CrawlMasterActor]
 
   case object CrawlAllCompetitors
-
-  case object CrawlComplete
 }
 
 class CrawlMasterActor @Inject()(
