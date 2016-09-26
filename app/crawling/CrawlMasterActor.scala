@@ -31,13 +31,11 @@ class CrawlMasterActor @Inject()(
 
     case CrawlAllCompetitors =>
       for(cmttrs <- competitorsRepo.getAll) cmttrs.foreach { cmp =>
-        val name = s"crawler-${cmp.id.getOrElse(0)}-${System.nanoTime}"
-        val crawlerActor = injectedChild(crawlersFactory(), name)
-        crawlerActor ! CrawlCompetitor(cmp)
+        //val name = s"crawler-${cmp.id.getOrElse(0)}-${System.nanoTime}"
+        //val crawlerActor = injectedChild(crawlersFactory(), name)
+        //crawlerActor ! CrawlCompetitor(cmp)
 
-        Logger.info(s"Crawl $name")
+        //Logger.info(s"Crawl $name")
       }
-
-    case CrawlComplete =>
   }
 }

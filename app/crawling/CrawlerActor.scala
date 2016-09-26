@@ -66,6 +66,9 @@ class CrawlerActor @Inject()(
         reviews <- getPages(firstReviews, c.crawledReviewsPages, c.url, "/feedbacks?status=m&from=")
       } yield {
 
+        Logger.info(s"Goods Pages Count -- ${goods.size}")
+        Logger.info(s"Reviews Pages Count -- ${reviews.size}")
+
         val reviewsActors =
           reviews.zipWithIndex.map { case(r, idx) =>
             val name = s"reviews-analizer-${c.id.getOrElse(0)}-$idx-${System.nanoTime}"
