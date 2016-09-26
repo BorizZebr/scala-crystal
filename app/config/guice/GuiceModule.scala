@@ -23,9 +23,6 @@ class GuiceModule extends AbstractModule with AkkaGuiceSupport {
 
     bindActor[CrawlMasterActor]("crawl-master")
     bindActor[CompetitorsBootstraperActor]("cmpttr-btstrpr")
-    bindActorFactory[CrawlerActor, CrawlerActor.Factory]
-    bindActorFactory[ReviewsAnalizerActor, ReviewsAnalizerActor.Factory]
-    bindActorFactory[GoodsAnalizerActor, GoodsAnalizerActor.Factory]
     bindActorFactory[PersisterActor, PersisterActor.Factory]
   }
 }

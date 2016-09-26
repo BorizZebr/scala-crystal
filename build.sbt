@@ -11,12 +11,12 @@ lazy val `scala-crystal` = (project in file("."))
     libraryDependencies ++= dependencies,
     unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" ),
     //javaOptions in Test += "-Dconfig.resource=application.test.conf",
-    javaOptions in run += "-Dconfig.resource=application.demo.conf",
+    //javaOptions in run += "-Dconfig.resource=application.demo.conf",
     maintainer in Linux := "Boriz Zebr <borizzebr@egmail.com>",
     packageSummary in Linux := "Crystal Sister",
     packageDescription := "Crystal Sister",
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
-    fork in run := true,
+    //fork in run := true,
     javaOptions in Universal ++= Seq(
       // JVM memory tuning
       "-J-Xmx784m",

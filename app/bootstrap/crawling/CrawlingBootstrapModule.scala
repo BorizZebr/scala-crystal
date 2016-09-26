@@ -26,7 +26,7 @@ private[crawling] class CrawlingBoostrap @Inject()(
     @Named("cmpttr-btstrpr") competitorsBootstrapActor: ActorRef) {
 
   system.scheduler.schedule(3 seconds, 1 minutes, competitorsBootstrapActor, BootstrapCompetitors)
-  system.scheduler.scheduleOnce(1 minute, crawlMasterActor, CrawlAllCompetitors)
+  system.scheduler.scheduleOnce(10 seconds, crawlMasterActor, CrawlAllCompetitors)
 
   val delay = DateTime.now.plusDays(1).withTimeAtStartOfDay.getMillis - System.currentTimeMillis()
   system.scheduler.schedule(delay milliseconds, 24 hours, crawlMasterActor, CrawlAllCompetitors)
