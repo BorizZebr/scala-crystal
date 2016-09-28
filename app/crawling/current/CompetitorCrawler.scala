@@ -52,24 +52,25 @@ class CompetitorCrawler (
     val chain = for {
       main <- mainFuture
       firstReviews <- firstReviewsFuture
-      reviewsPages <- getPages(firstReviews, cmp.crawledReviewsPages, 20, cmp.url, "/feedbacks?status=m&from=")
-      _ = Logger.info(s"${cmp.name} Reviews Pages Count -- ${reviewsPages.size}")
 
       goodsPages <- getPages(main, cmp.crawledGoodsPages, 40, cmp.url, "?sortitems=0&v=0&from=")
       _ = Logger.info(s"${cmp.name} Goods Pages Count -- ${goodsPages.size}")
 
-      reviews <- parseReviews(reviewsPages)
-      //_ = Logger.info(s"${cmp.name} Reviews Count -- ${reviews.size}")
+      reviewsPages <- getPages(firstReviews, cmp.crawledReviewsPages, 20, cmp.url, "/feedbacks?status=m&from=")
+      _ = Logger.info(s"${cmp.name} Reviews Pages Count -- ${reviewsPages.size}")
 
       goods <- parseGoods(goodsPages)
-      //_ = Logger.info(s"${cmp.name} Goods Count -- ${goods.size}")
+      _ = Logger.info(s"${cmp.name} Goods Count -- ${goods.size}")
 
-      ur <- updateReviews(reviews)
-      ug <- updateGoods(goods)
+      reviews <- parseReviews(reviewsPages)
+      _ = Logger.info(s"${cmp.name} Reviews Count -- ${reviews.size}")
+
+      _ <- updateReviews(reviews)
+      _ <- updateGoods(goods)
+
       subscribersAmount = Jsoup.parse(main.bodyAsUTF8).select("#totalSubscribers").text.toInt
       _ <- updateAmount(subscribersAmount, LocalDate.now)
     } yield (goodsPages.size, reviewsPages.size)
-    //} yield (goodsPages.size, 0)
 
     chain.onComplete(_ => client.close())
 
@@ -136,28 +137,36 @@ class CompetitorCrawler (
       }
   }
 
-  def updateReviews(reviews: Seq[Review]): Future[Seq[Long]] = {
+  def updateReviews(reviews: Seq[Review]) = {
     val futures = reviews.map { r =>
-      for {
-        c <- reviewsRepo.contains(r)
-        if !c
-        res <- reviewsRepo.insert(r)
-      } yield res
+      reviewsRepo.contains(r).flatMap { c =>
+        if(c) Future.successful(None)
+        else reviewsRepo.insert(r) map Option.apply
+      }
     }
 
-    Future.sequence(futures)
+    val res = Future.sequence(futures)
+    res.onFailure {
+      case e:Exception => Logger.error(s"ALARM REVIEWS -- ${e.getMessage}")
+    }
+    res
   }
 
-  def updateGoods(goods: Seq[Good]): Future[Seq[Long]] = {
+
+  def updateGoods(goods: Seq[Good]) = {
     val futures = goods.map { g =>
-      for {
-        c <- goodsRepo.contains(g)
-        if !c
-        res <- goodsRepo.insert(g)
-      } yield res
+      goodsRepo.contains(g).flatMap { c =>
+        if(c) Future.successful(None)
+        else goodsRepo.insert(g) map Option.apply
+      }
     }
 
-    Future.sequence(futures)
+    val res = Future.sequence(futures)
+    res.onFailure {
+      case e:Exception => Logger.error(s"ALARM GOODS -- ${e.getMessage}")
+    }
+    res
+
   }
 
   def getPage(url: String): Future[WSResponse] =

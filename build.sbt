@@ -1,13 +1,13 @@
 import sbt.Keys._
 
 lazy val `scala-crystal` = (project in file("."))
-  .dependsOn(crystalDal)
   .enablePlugins(PlayScala, JavaServerAppPackaging, DebianPlugin, SystemdPlugin)
   .settings(Defaults.itSettings: _*)
   .settings(
     name := "scala-crystal",
-    version := "1.0",
+    version := "1.1",
     scalaVersion := "2.11.8",
+    organization := "com.zebrosoft",
     libraryDependencies ++= dependencies,
     unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" ),
     //javaOptions in Test += "-Dconfig.resource=application.test.conf",
@@ -15,7 +15,10 @@ lazy val `scala-crystal` = (project in file("."))
     maintainer in Linux := "Boriz Zebr <borizzebr@egmail.com>",
     packageSummary in Linux := "Crystal Sister",
     packageDescription := "Crystal Sister",
-    resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
+    resolvers ++= Seq(
+      "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
+      Resolver.mavenLocal
+    ),
     //fork in run := true,
     javaOptions in Universal ++= Seq(
       // JVM memory tuning
@@ -38,10 +41,9 @@ lazy val `scala-crystal` = (project in file("."))
 
   )
 
-
-lazy val crystalDal = RootProject(uri("git://github.com/BorizZebr/scala-crystal-dal.git#master"))
-
 lazy val dependencies = Seq( cache , ws, evolutions,
+  // zebrosoft
+  "com.zebrosoft" %% "scala-crystal-dal" % "1.0",
   // database
   "com.typesafe.slick" %% "slick" % "3.1.1",
   "com.typesafe.play" %% "play-slick" % "2.0.2",
