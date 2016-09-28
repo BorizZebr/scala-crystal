@@ -33,7 +33,7 @@ class CrawlMasterActor @Inject()(
     case CrawlAllCompetitors =>
       competitorsRepo.getAll.map { cmpttr =>
         cmpttr.foreach { cmp =>
-          val crawler = new CompetitorCrawler(cmp, chartsRepo, reviewsRepo, goodsRepo)
+          val crawler = new CompetitorCrawler(cmp, competitorsRepo, chartsRepo, reviewsRepo, goodsRepo)
           crawler.crawlCompetitor()
         }
       }

@@ -4,10 +4,10 @@ import java.nio.charset.StandardCharsets
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import com.zebrosoft.crystal.dal.repos.{ChartsDao, GoodsDao, ReviewsDao}
+import com.zebrosoft.crystal.dal.repos.{ChartsDao, CompetitorsDao, GoodsDao, ReviewsDao}
 import com.zebrosoft.crystal.model.{Chart, Competitor, Good, Review}
-import org.joda.time.LocalDate
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
+import org.joda.time.{DateTime, LocalDate}
 import org.jsoup.Jsoup
 import play.api.Logger
 import play.api.libs.ws.WSResponse
@@ -21,6 +21,7 @@ import scala.concurrent.Future
   */
 class CompetitorCrawler (
     cmp: Competitor,
+    competitorsRepo: CompetitorsDao,
     chartsRepo: ChartsDao,
     reviewsRepo: ReviewsDao,
     goodsRepo: GoodsDao
@@ -41,40 +42,49 @@ class CompetitorCrawler (
 
   def crawlCompetitor() = {
 
-    val mainFuture = getPage(s"${cmp.url}/?sortitems=4&v=0", "main page")
-    val firstReviewsFuture = getPage(s"${cmp.url}/feedbacks", "main reviews")
+    val startTime = DateTime.now
+    competitorsRepo.update(cmp.copy(
+      lastCrawlStart = Some(startTime),
+      lastCrawlFinish = None))
+    val mainFuture = getPage(s"${cmp.url}/?sortitems=4&v=0")
+    val firstReviewsFuture = getPage(s"${cmp.url}/feedbacks")
 
-    for {
+    val chain = for {
       main <- mainFuture
       firstReviews <- firstReviewsFuture
       reviewsPages <- getPages(firstReviews, cmp.crawledReviewsPages, 20, cmp.url, "/feedbacks?status=m&from=")
+      _ = Logger.info(s"${cmp.name} Reviews Pages Count -- ${reviewsPages.size}")
+
       goodsPages <- getPages(main, cmp.crawledGoodsPages, 40, cmp.url, "?sortitems=0&v=0&from=")
-    } {
+      _ = Logger.info(s"${cmp.name} Goods Pages Count -- ${goodsPages.size}")
 
-      // need to filter review/goods pages by status -- in case not all of them are 200 --> fail!
-      // if everything is fine --> proceed and not forget to update competitor with parsed pages and start/finish date
+      reviews <- parseReviews(reviewsPages)
+      _ = Logger.info(s"${cmp.name} Reviews Count -- ${reviews.size}")
 
-      Logger.info(s"Goods Pages Count -- ${goodsPages.size}")
-      Logger.info(s"Reviews Pages Count -- ${reviewsPages.size}")
+      goods <- parseGoods(goodsPages)
+      _ = Logger.info(s"${cmp.name} Goods Count -- ${goods.size}")
 
-      val subscribersAmount = Jsoup.parse(main.bodyAsUTF8).select("#totalSubscribers").text.toInt
-      updateAmount(subscribersAmount, LocalDate.now)
+      ur <- updateReviews(reviews)
+      ug <- updateGoods(goods)
+      subscribersAmount = Jsoup.parse(main.bodyAsUTF8).select("#totalSubscribers").text.toInt
+      _ <- updateAmount(subscribersAmount, LocalDate.now)
+    } yield (goodsPages.size, reviewsPages.size)
 
-      val parsedGoods = Future.sequence(goodsPages map parseGoodsPage).map(_.flatten)
-      val parsedReviews = Future.sequence(reviewsPages map parseReviewsPage).map(_.flatten)
-
-      for {
-        goods <- parsedGoods
-        reviews <- parsedReviews
-      } yield {
-        Logger.info(s"Goods Count -- ${goods.size}")
-        Logger.info(s"Reviews Count -- ${reviews.size}")
-
-        updateGoods(goods)
-        updateReviews(reviews)
-      }
+    chain.map { case(gs, rs) =>
+      val updatedCmp = cmp.copy(
+        lastCrawlStart = Some(startTime),
+        lastCrawlFinish = Some(DateTime.now),
+        crawledGoodsPages = cmp.crawledGoodsPages + gs,
+        crawledReviewsPages = cmp.crawledReviewsPages + rs)
+      competitorsRepo.update(updatedCmp)
     }
   }
+
+  def parseReviews(reviewsPages: Seq[WSResponse]) =
+    Future.sequence(reviewsPages map parseReviewsPage).map(_.flatten)
+
+  def parseGoods(goodsPages: Seq[WSResponse]) =
+    Future.sequence(goodsPages map parseGoodsPage).map(_.flatten)
 
   def parseReviewsPage(page: WSResponse): Future[Seq[Review]] = {
     Future {
@@ -87,7 +97,7 @@ class CompetitorCrawler (
     }
   }
 
-  def parseGoodsPage(page:WSResponse): Future[Seq[Good]] = {
+  def parseGoodsPage(page: WSResponse): Future[Seq[Good]] = {
     Future {
       val g = Jsoup.parse(page.bodyAsUTF8)
       for (el <- g.select("div.b-item.b-item-hover")) yield {
@@ -109,41 +119,53 @@ class CompetitorCrawler (
     }
   }
 
-  def updateAmount(am: Int, date: LocalDate) = {
+  def updateAmount(am: Int, date: LocalDate): Future[Unit] = {
     chartsRepo
       .getByCompetitorAndDate(cmp.id.get, date)
-      .map {
+      .flatMap {
         case Some(x) =>
           val chart = x.updateAmount(am)
           chartsRepo.update(chart)
 
         case None =>
           val chart = Chart(None, cmp.id, am, LocalDate.now)
-          chartsRepo.insert(chart)
+          chartsRepo.insert(chart).map(_ => ())
       }
   }
 
-  def updateReviews(reviews: Seq[Review]) =
-    for {
-      r <- reviews
-      c <- reviewsRepo.contains(r)
-      if !c
-    } reviewsRepo.insert(r)
-
-  def updateGoods(goods: Seq[Good]) =
-    for {
-      g <- goods
-      c <- goodsRepo.contains(g)
-      if !c
-    } goodsRepo.insert(g)
-
-  def getPage(url: String, log: String): Future[WSResponse] = {
-    val req = client.url(url).get()
-    req.map { res =>
-      Logger.info(s"$log status ${res.status}")
-      res
+  def updateReviews(reviews: Seq[Review]): Future[Seq[Long]] = {
+    val futures = reviews.map { r =>
+      for {
+        c <- reviewsRepo.contains(r)
+        if !c
+        res <- reviewsRepo.insert(r)
+      } yield res
     }
+
+    Future.sequence(futures)
   }
+
+  def updateGoods(goods: Seq[Good]): Future[Seq[Long]] = {
+    val futures = goods.map { g =>
+      for {
+        c <- goodsRepo.contains(g)
+        if !c
+        res <- goodsRepo.insert(g)
+      } yield res
+    }
+
+    Future.sequence(futures)
+  }
+
+  def getPage(url: String): Future[WSResponse] =
+    client.url(url).get().map {
+      case res if res.status != 200 =>
+        Logger.error(s"$url status ${res.status}")
+        throw new Exception()
+      case res =>
+        Logger.info(s"$url status OK")
+        res
+    }
 
   def getPages(
       mainPage: WSResponse,
@@ -155,7 +177,7 @@ class CompetitorCrawler (
     Future.sequence {
       (0 to (pageCount - pagesCount max 0)).map { i =>
         Thread.sleep(500)
-        getPage(s"$cUrl$url${perPage * i}", s"crawl $url page $i")
+        getPage(s"$cUrl$url${perPage * i}")
       }
     }
   }
