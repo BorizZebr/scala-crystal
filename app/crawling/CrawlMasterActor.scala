@@ -5,6 +5,7 @@ import javax.inject.Inject
 import akka.actor.{Actor, Props}
 import com.zebrosoft.crystal.dal.repos.{ChartsDao, CompetitorsDao, GoodsDao, ReviewsDao}
 import crawling.current.CompetitorCrawler
+import play.api.Logger
 import play.api.libs.concurrent.InjectedActorSupport
 
 /**
@@ -34,7 +35,9 @@ class CrawlMasterActor @Inject()(
       competitorsRepo.getAll.map { cmpttr =>
         cmpttr.foreach { cmp =>
           val crawler = new CompetitorCrawler(cmp, competitorsRepo, chartsRepo, reviewsRepo, goodsRepo)
-          crawler.crawlCompetitor()
+          crawler.crawlCompetitor().map { _ =>
+            Logger.info(s"${cmp.name} crawling done")
+          }
         }
       }
   }

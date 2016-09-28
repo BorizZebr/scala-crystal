@@ -59,16 +59,19 @@ class CompetitorCrawler (
       _ = Logger.info(s"${cmp.name} Goods Pages Count -- ${goodsPages.size}")
 
       reviews <- parseReviews(reviewsPages)
-      _ = Logger.info(s"${cmp.name} Reviews Count -- ${reviews.size}")
+      //_ = Logger.info(s"${cmp.name} Reviews Count -- ${reviews.size}")
 
       goods <- parseGoods(goodsPages)
-      _ = Logger.info(s"${cmp.name} Goods Count -- ${goods.size}")
+      //_ = Logger.info(s"${cmp.name} Goods Count -- ${goods.size}")
 
       ur <- updateReviews(reviews)
       ug <- updateGoods(goods)
       subscribersAmount = Jsoup.parse(main.bodyAsUTF8).select("#totalSubscribers").text.toInt
       _ <- updateAmount(subscribersAmount, LocalDate.now)
     } yield (goodsPages.size, reviewsPages.size)
+    //} yield (goodsPages.size, 0)
+
+    chain.onComplete(_ => client.close())
 
     chain.map { case(gs, rs) =>
       val updatedCmp = cmp.copy(
@@ -80,10 +83,10 @@ class CompetitorCrawler (
     }
   }
 
-  def parseReviews(reviewsPages: Seq[WSResponse]) =
+  def parseReviews(reviewsPages: Seq[WSResponse]): Future[Seq[Review]] =
     Future.sequence(reviewsPages map parseReviewsPage).map(_.flatten)
 
-  def parseGoods(goodsPages: Seq[WSResponse]) =
+  def parseGoods(goodsPages: Seq[WSResponse]): Future[Seq[Good]] =
     Future.sequence(goodsPages map parseGoodsPage).map(_.flatten)
 
   def parseReviewsPage(page: WSResponse): Future[Seq[Review]] = {
@@ -176,7 +179,7 @@ class CompetitorCrawler (
     val pageCount = getPagesCount(mainPage)
     Future.sequence {
       (0 to (pageCount - pagesCount max 0)).map { i =>
-        Thread.sleep(500)
+        Thread.sleep(250)
         getPage(s"$cUrl$url${perPage * i}")
       }
     }
